@@ -39,6 +39,11 @@ import com.example.cost_splitter.ui.state.CalcState
 
 @Composable
 fun Home(navCtrl: NavController, viewModel: MyViewModel) {
+    /*
+        Screen used for displaying amounts owed for each person and
+        the total amount of the bill (used to double check that you entered
+        the item prices and taxes correctly.
+     */
     val calcState: CalcState = viewModel.calcState
 
     Column(
@@ -47,9 +52,16 @@ fun Home(navCtrl: NavController, viewModel: MyViewModel) {
             .background(Color.Gray)
             .padding(horizontal = 6.dp)
     ) {
-        // top bar containing reset buttons
-        TopBar(calcState)
-        Spacer(Modifier.height(20.dp))
+
+    }
+
+}
+
+
+/*
+// top bar containing reset buttons
+//        TopBar(calcState)
+//        Spacer(Modifier.height(20.dp))
 
         // main splitting section
         Column(
@@ -138,6 +150,4 @@ fun Home(navCtrl: NavController, viewModel: MyViewModel) {
             // one row for showing gst and pst
             // one row for showing total price and price owed by each person
         }
-    }
-
-}
+ */

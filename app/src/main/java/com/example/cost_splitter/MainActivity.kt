@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cost_splitter.ui.composables.BottomBar
 import com.example.cost_splitter.ui.composables.TopBar
 import com.example.cost_splitter.ui.state.CalcState
 import com.example.cost_splitter.ui.theme.Cost_splitterTheme
@@ -34,24 +36,34 @@ class MainActivity : ComponentActivity() {
 
             viewModel = ViewModelProvider(this)[MyViewModel::class.java]
 
-            NavHost(
-                navController = navCtrl,
-                modifier = Modifier.fillMaxWidth(),
-                startDestination = "home"
-            ) {
-                // home screen showing all totals and amt owed per person
-                composable("home") {
-                    Home(navCtrl, viewModel)
+            Scaffold(
+                topBar = {
+                    TopBar(navCtrl)
+                },
+                bottomBar = {
+                    BottomBar(navCtrl)
+                },
+                content = { padding ->
+                    NavHost(
+                        navController = navCtrl,
+                        modifier = Modifier.fillMaxWidth().padding(padding),
+                        startDestination = "home"
+                    ) {
+                        // home screen showing all totals and amt owed per person
+                        composable("home") {
+                            Home(navCtrl, viewModel)
+                        }
+                        // items screen to add/remove items
+                        composable("items") {
+                            ItemsScreen(navCtrl, viewModel)
+                        }
+                        // people screen to add/remove people and assign items to them
+                        composable("people") {
+                            PeopleScreen(navCtrl, viewModel)
+                        }
+                    }
                 }
-                // items screen to add/remove items
-                composable("items") {
-                    ItemsScreen(navCtrl, viewModel)
-                }
-                // people screen to add/remove people and assign items to them
-                composable("people") {
-                    PeopleScreen(navCtrl, viewModel)
-                }
-            }
+            )
         }
     }
 }
