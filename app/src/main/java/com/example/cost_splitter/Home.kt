@@ -2,7 +2,9 @@ package com.example.cost_splitter
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
@@ -20,15 +22,12 @@ import com.example.cost_splitter.ui.state.CalcState
 fun Home(navCtrl: NavController) {
     val calcState: CalcState = viewModel(navCtrl.getBackStackEntry("home"))
 
-    TopBar(calcState)
     Column(
-        modifier = Modifier.fillMaxSize().padding(8.dp).background(Color.Gray)
+        modifier = Modifier.fillMaxSize().background(Color.Gray).padding(horizontal = 6.dp)
     ) {
+        TopBar(calcState)
+        Spacer(Modifier.height(20.dp))
         Text("placeholder", fontSize = 30.sp)
     }
-//    LazyColumn(
-//        modifier = Modifier.fillMaxSize().padding(8.dp)
-//    ) {
-//        Text("placeholder", fontSize = 30.sp)
-//    }
+
 }
