@@ -38,8 +38,8 @@ import com.example.cost_splitter.ui.composables.TopBar
 import com.example.cost_splitter.ui.state.CalcState
 
 @Composable
-fun Home(navCtrl: NavController) {
-    val calcState: CalcState = viewModel(navCtrl.getBackStackEntry("home"))
+fun Home(navCtrl: NavController, viewModel: MyViewModel) {
+    val calcState: CalcState = viewModel.calcState
 
     Column(
         modifier = Modifier

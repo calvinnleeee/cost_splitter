@@ -21,6 +21,8 @@ import com.example.cost_splitter.ui.state.CalcState
 
 @Composable
 fun TopBar(calcState: CalcState) {
+    // top nav bar
+
     Row(
         modifier = Modifier
             .fillMaxWidth()

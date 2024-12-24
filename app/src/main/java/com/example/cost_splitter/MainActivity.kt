@@ -12,6 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,6 +23,8 @@ import com.example.cost_splitter.ui.state.CalcState
 import com.example.cost_splitter.ui.theme.Cost_splitterTheme
 
 class MainActivity : ComponentActivity() {
+    private lateinit var viewModel: MyViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -28,16 +32,24 @@ class MainActivity : ComponentActivity() {
             // nav controller used for viewmodel to allow display rotation
             val navCtrl = rememberNavController()
 
+            viewModel = ViewModelProvider(this)[MyViewModel::class.java]
+
             NavHost(
                 navController = navCtrl,
                 modifier = Modifier.fillMaxWidth(),
                 startDestination = "home"
             ) {
+                // home screen showing all totals and amt owed per person
                 composable("home") {
-                    viewModel(navCtrl.getBackStackEntry("home")) {
-                        CalcState()
-                    }
-                    Home(navCtrl)
+                    Home(navCtrl, viewModel)
+                }
+                // items screen to add/remove items
+                composable("items") {
+                    ItemsScreen(navCtrl, viewModel)
+                }
+                // people screen to add/remove people and assign items to them
+                composable("people") {
+                    PeopleScreen(navCtrl, viewModel)
                 }
             }
         }
