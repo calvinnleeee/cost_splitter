@@ -29,8 +29,8 @@ class CalcState: ViewModel() {
     }
 
     // remove person
-    fun removePerson(idx: Int) {
-
+    fun removePerson(person: MutableList<Boolean>) {
+        people.remove(person)
     }
 
     // add item (initially 0.00, no taxes applied)
@@ -39,7 +39,12 @@ class CalcState: ViewModel() {
     }
 
     // remove item
-    fun removeItem(idx: Int) {
-        // remove item at idx, remove the row from people
+    fun removeItem(item: Triple<Float, Boolean, Boolean>) {
+        val row_to_remove = items.indexOf(item)
+        items.remove(item)
+        // remove the row corresponding to this item in every person's list
+        for (person in people) {
+            person.removeAt(row_to_remove)
+        }
     }
 }
