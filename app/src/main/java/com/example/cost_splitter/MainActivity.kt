@@ -35,6 +35,9 @@ class MainActivity : ComponentActivity() {
             val navCtrl = rememberNavController()
 
             viewModel = ViewModelProvider(this)[MyViewModel::class.java]
+            // test code to add items in the list
+            viewModel.calcState.addItem()
+            viewModel.calcState.addItem()
 
             Scaffold(
                 topBar = {
