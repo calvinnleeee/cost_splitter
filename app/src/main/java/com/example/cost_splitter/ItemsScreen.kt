@@ -10,9 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.cost_splitter.ui.composables.ItemRow
+import com.example.cost_splitter.ui.data.Item
 
 @Composable
 fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
@@ -35,7 +42,9 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
     val calcState = vm.calcState
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.LightGray),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.LightGray),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(30.dp))
@@ -43,7 +52,9 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
         // header for the window
         Text(
             "Manage items",
-            modifier = Modifier.width(200.dp).padding(vertical = 4.dp),
+            modifier = Modifier
+                .width(200.dp)
+                .padding(vertical = 4.dp),
             fontSize = 24.sp,
             textAlign = TextAlign.Center
         )
@@ -58,7 +69,10 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
         } else {
             // Row of text (name, price, GST, PST, blank column for remove button)
             Row(
-                modifier = Modifier.fillMaxWidth().height(30.dp).padding(bottom = 5.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(30.dp)
+                    .padding(bottom = 5.dp)
             ) {
                 Text(
                     "Item",
@@ -94,7 +108,28 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             items(calcState.items.size) { idx ->
-                ItemRow(calcState.items[idx])
+                val removeCallback = fun (item: Item) {
+                    calcState.removeItem(item)
+                }
+                ItemRow(calcState.items[idx], removeCallback)
+            }
+        }
+
+        // row with the add button
+        Row(
+            modifier = Modifier.height(40.dp)
+        ) {
+            Button(
+                onClick = {
+                    calcState.addItem()
+                },
+                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = null,
+                    tint = Color.Black
+                )
             }
         }
     }
