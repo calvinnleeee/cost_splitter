@@ -1,5 +1,6 @@
 package com.example.cost_splitter
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,6 +22,10 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.cost_splitter.ui.composables.ItemPopup
 import com.example.cost_splitter.ui.composables.ItemRow
 import com.example.cost_splitter.ui.data.Item
 
@@ -40,6 +46,18 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
         Item names/bars can be clicked to change the price.
      */
     val calcState = vm.calcState
+
+    // variables for managing the popup edit window
+    var popup by remember{ mutableStateOf(false) }
+    var item_to_edit = remember { mutableStateOf<Item?>(null) }
+    val togglePopup = fun () {
+        popup = !popup
+    }
+    // function assigns the current item clicked to the holder for editing
+    val popupCallback = fun (item: Item) {
+        item_to_edit.value = item
+        togglePopup()
+    }
 
     Column(
         modifier = Modifier
@@ -59,6 +77,8 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(20.dp))
+
+        // add section to show totals here if there are items in the list
 
         // display table headers if items exist, otherwise an empty spacer
         if (calcState.items.size == 0) {
@@ -108,10 +128,12 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             items(calcState.items.size) { idx ->
+                // callback for removing item from list
                 val removeCallback = fun (item: Item) {
                     calcState.removeItem(item)
                 }
-                ItemRow(calcState.items[idx], removeCallback)
+
+                ItemRow(calcState.items[idx], removeCallback, popupCallback)
             }
         }
 
@@ -130,6 +152,13 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
                     contentDescription = null,
                     tint = Color.Black
                 )
+            }
+        }
+
+        if (popup) {
+            Log.i("info", "item to edit is ${item_to_edit.value}")
+            if (item_to_edit.value != null) {
+                ItemPopup(item_to_edit.value, togglePopup)
             }
         }
     }

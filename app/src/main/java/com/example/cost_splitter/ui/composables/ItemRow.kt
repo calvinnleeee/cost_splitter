@@ -12,16 +12,21 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.example.cost_splitter.ui.data.Item
 
 @Composable
-fun ItemRow(item: Item, removeCallback: (Item) -> Unit) {
+fun ItemRow(item: Item, removeCallback: (Item) -> Unit, popupToggle: (Item) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().height(45.dp)
     ) {
@@ -33,7 +38,8 @@ fun ItemRow(item: Item, removeCallback: (Item) -> Unit) {
                 .padding(start = 10.dp)
                 .align(Alignment.CenterVertically)
                 .clickable{
-                    // pop up or smth here to change the name of the item
+                    // call the callback to set the item that needs to be edited
+                    popupToggle(item)
                 },
             fontSize = 14.sp,
             textAlign = TextAlign.Start
@@ -47,6 +53,7 @@ fun ItemRow(item: Item, removeCallback: (Item) -> Unit) {
                 .align(Alignment.CenterVertically)
                 .clickable{
                     // pop up or smth here to change the price of the item
+                    popupToggle(item)
                 },
             fontSize = 14.sp,
             textAlign = TextAlign.Start
