@@ -2,6 +2,7 @@ package com.example.cost_splitter.ui.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +14,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -43,16 +48,15 @@ import kotlinx.coroutines.android.awaitFrame
 fun ItemPopup(item: Item?, dismissCallback: () -> Unit) {
     var name by remember{ mutableStateOf(item!!.name.value) }
     var price by remember{ mutableStateOf(item!!.price.value) }
-
+    var displayError by remember{ mutableStateOf(false) }
 
     Dialog(
-//        alignment = Alignment.Center,
         onDismissRequest = { dismissCallback() },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.8F)
-                .height(300.dp)
+                .height(360.dp)
                 .border(2.dp, Color.Black)
                 .background(Color.White),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -60,28 +64,64 @@ fun ItemPopup(item: Item?, dismissCallback: () -> Unit) {
             Spacer(Modifier.height(20.dp))
             TextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = { if (it.isNotEmpty()) name = it },
                 modifier = Modifier.width(350.dp).padding(20.dp),
                 label = { Text("Item name", fontSize = 10.sp) },
+                trailingIcon = {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = Color.Red,
+                        modifier = Modifier.clickable{
+                            name = ""
+                        }
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 singleLine = true
             )
             TextField(
                 value = price,
-                onValueChange = { price = it },
+                onValueChange = { if (it.isNotEmpty()) price = it },
                 modifier = Modifier.width(350.dp).padding(20.dp),
                 label = { Text("Item price", fontSize = 10.sp)},
+                trailingIcon = {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = Color.Red,
+                        modifier = Modifier.clickable{
+                            price = ""
+                        }
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
             )
-            Spacer(Modifier.height(10.dp))
+            // display error message if a field is empty, else use a spacer
+            if (displayError) {
+                Text(
+                    "Cannot have an empty field!",
+                    fontSize = 12.sp,
+                    modifier = Modifier.height(15.dp),
+                    color = Color.Red
+                )
+            }
+            else {
+                Spacer(Modifier.height(15.dp))
+            }
             Button(
                 onClick = {
-                    item!!.name.value = name
-                    item.price.value = price
-                    dismissCallback()
+                    if (name.isNotEmpty() && price.isNotEmpty()) {
+                        item!!.name.value = name
+                        item.price.value = price
+                        dismissCallback()
+                    }
+                    else {
+                        displayError = true
+                    }
                 },
-                modifier = Modifier.width(120.dp).padding(bottom = 20.dp),
+                modifier = Modifier.width(120.dp).padding(vertical = 20.dp),
                 shape = RoundedCornerShape(30),
                 colors = ButtonDefaults.buttonColors().copy(
                     containerColor = Color.LightGray,
