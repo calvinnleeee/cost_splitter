@@ -26,7 +26,12 @@ import androidx.compose.ui.window.Popup
 import com.example.cost_splitter.ui.data.Item
 
 @Composable
-fun ItemRow(item: Item, removeCallback: (Item) -> Unit, popupToggle: (Item) -> Unit) {
+fun ItemRow(
+    item: Item,
+    removeCallback: (Item) -> Unit,
+    popupToggle: (Item) -> Unit,
+    updateCallback: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth().height(45.dp)
     ) {
@@ -63,6 +68,7 @@ fun ItemRow(item: Item, removeCallback: (Item) -> Unit, popupToggle: (Item) -> U
             checked = item.gst.value,
             onCheckedChange = {
                 item.gst.value = !item.gst.value
+                updateCallback()
             },
             modifier = Modifier.width(50.dp).height(30.dp).align(Alignment.CenterVertically)
         )
@@ -71,6 +77,7 @@ fun ItemRow(item: Item, removeCallback: (Item) -> Unit, popupToggle: (Item) -> U
             checked = item.pst.value,
             onCheckedChange = {
                 item.pst.value = !item.pst.value
+                updateCallback()
             },
             modifier = Modifier.width(50.dp).height(30.dp).align(Alignment.CenterVertically)
         )

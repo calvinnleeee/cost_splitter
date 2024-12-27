@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,6 +63,21 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
         togglePopup()
     }
 
+    // variables for keeping track of totals
+    var pretax by remember{ mutableFloatStateOf(0F) }
+    var gstTotal by remember{ mutableFloatStateOf(0F) }
+    var pstTotal by remember{ mutableFloatStateOf(0F) }
+    val updateTotals = fun() {
+        pretax = 0F
+        gstTotal = 0F
+        pstTotal = 0F
+        for (item in calcState.items) {
+            pretax += item.price.value
+            if (item.gst.value) gstTotal += (item.price.value * 0.05F)
+            if (item.pst.value) pstTotal += (item.price.value * 0.10F)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,7 +97,30 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
         )
         Spacer(Modifier.height(20.dp))
 
-        // add section to show totals here if there are items in the list
+        // display totals (pretax, gst, pst) here if there are items in the list
+        if (calcState.items.size > 0) {
+            Row(
+                modifier = Modifier.height(25.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Text(
+                    "Pretax:  ${"%.2f".format(pretax)}",
+                    modifier = Modifier.width(120.dp),
+                    fontSize = 16.sp
+                )
+                Text(
+                    "GST:  ${"%.2f".format(gstTotal)}",
+                    modifier = Modifier.width(100.dp),
+                    fontSize = 16.sp
+                )
+                Text(
+                    "PST:  ${"%.2f".format(pstTotal)}",
+                    modifier = Modifier.width(100.dp),
+                    fontSize = 16.sp
+                )
+            }
+            Spacer(Modifier.height(20.dp))
+        }
 
         // display table headers if items exist, otherwise an empty spacer
         if (calcState.items.size == 0) {
@@ -89,7 +129,7 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
                 modifier = Modifier.height(30.dp)
             )
         } else {
-            // Row of text (name, price, GST, PST, blank column for remove button)
+            // Row of text (name, price, GST, PST, blank column to space for remove button)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -136,9 +176,10 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
                     // callback for removing item from list
                     val removeCallback = fun(item: Item) {
                         calcState.removeItem(item)
+                        updateTotals()
                     }
 
-                    ItemRow(calcState.items[idx], removeCallback, popupCallback)
+                    ItemRow(calcState.items[idx], removeCallback, popupCallback, updateTotals)
                 }
             }
 
@@ -149,6 +190,7 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
                 Button(
                     onClick = {
                         calcState.addItem()
+                        updateTotals()
                     },
                     colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)
                 ) {
@@ -164,7 +206,7 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
         if (popup) {
             Log.i("info", "item to edit is ${item_to_edit.value}")
             if (item_to_edit.value != null) {
-                ItemPopup(item_to_edit.value, togglePopup)
+                ItemPopup(item_to_edit.value, togglePopup, updateTotals)
             }
         }
     }

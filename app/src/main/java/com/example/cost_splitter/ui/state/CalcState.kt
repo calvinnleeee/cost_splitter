@@ -40,7 +40,7 @@ class CalcState: ViewModel() {
         // add item and update the people to have an extra row of booleans
         val newItem = Item(
             mutableStateOf<String>("item${items.size + 1}"),
-            mutableStateOf<String>("0.00"),
+            mutableStateOf<Float>(0.00F),
             mutableStateOf(false),
             mutableStateOf(false)
         )
