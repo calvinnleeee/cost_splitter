@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -124,34 +126,38 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
 
         // lazy column to provide scrolling
         // show a list of all items
-        LazyColumn(
+        Box(
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(calcState.items.size) { idx ->
-                // callback for removing item from list
-                val removeCallback = fun (item: Item) {
-                    calcState.removeItem(item)
-                }
-
-                ItemRow(calcState.items[idx], removeCallback, popupCallback)
-            }
-        }
-
-        // row with the add button
-        Row(
-            modifier = Modifier.height(40.dp)
-        ) {
-            Button(
-                onClick = {
-                    calcState.addItem()
-                },
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 50.dp)
             ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = null,
-                    tint = Color.Black
-                )
+                items(calcState.items.size) { idx ->
+                    // callback for removing item from list
+                    val removeCallback = fun(item: Item) {
+                        calcState.removeItem(item)
+                    }
+
+                    ItemRow(calcState.items[idx], removeCallback, popupCallback)
+                }
+            }
+
+            // row with the add button
+            Row(
+                modifier = Modifier.height(50.dp).align(Alignment.BottomCenter)
+            ) {
+                Button(
+                    onClick = {
+                        calcState.addItem()
+                    },
+                    colors = ButtonDefaults.buttonColors().copy(containerColor = Color.Transparent)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null,
+                        tint = Color.Black
+                    )
+                }
             }
         }
 
