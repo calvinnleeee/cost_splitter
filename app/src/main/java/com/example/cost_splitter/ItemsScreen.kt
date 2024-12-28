@@ -45,7 +45,7 @@ import com.example.cost_splitter.ui.data.Item
 fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
     /*
         Show the items currently added and checkboxes for each one to apply
-        gst or hst.
+        gst or pst.
         Display buttons for removing an individual item and adding items.
         Item names/bars can be clicked to change the price.
      */
@@ -165,7 +165,7 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
         }
 
         // lazy column to provide scrolling
-        // show a list of all items
+        // show a list of all items and the + button
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {

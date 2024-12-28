@@ -1,6 +1,7 @@
 package com.example.cost_splitter.ui.composables
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,62 +25,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.example.cost_splitter.ui.data.Item
+import com.example.cost_splitter.ui.data.Person
 
 @Composable
-fun ItemRow(
-    item: Item,
-    removeCallback: (Item) -> Unit,
-    popupToggle: (Item) -> Unit,
-    updateCallback: () -> Unit
+fun PersonRow(
+    person: Person,
+    removeCallback: (Person) -> Unit,
+    popupToggle: (Person) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(45.dp)
+        modifier = Modifier.fillMaxWidth().height(45.dp),
+        horizontalArrangement = Arrangement.Center
     ) {
         // name (clickable for editing)
         Text(
-            item.name.value,
+            person.name.value,
             modifier = Modifier
-                .width(150.dp)
+                .width(200.dp)
                 .padding(start = 10.dp)
                 .align(Alignment.CenterVertically)
                 .clickable{
                     // call the callback to set the item that needs to be edited
-                    popupToggle(item)
+                    popupToggle(person)
                 },
             fontSize = 14.sp,
             textAlign = TextAlign.Start
-        )
-        // price (clickable for editing)
-        Text(
-            "$%.2f".format(item.price.value),
-            modifier = Modifier
-                .width(100.dp)
-                .padding(start = 5.dp)
-                .align(Alignment.CenterVertically)
-                .clickable{
-                    // pop up or smth here to change the price of the item
-                    popupToggle(item)
-                },
-            fontSize = 14.sp,
-            textAlign = TextAlign.Start
-        )
-        // gst checkbox
-        Checkbox(
-            checked = item.gst.value,
-            onCheckedChange = {
-                item.gst.value = !item.gst.value
-                updateCallback()
-            },
-            modifier = Modifier.width(50.dp).height(30.dp).align(Alignment.CenterVertically)
-        )
-        // pst checkbox
-        Checkbox(
-            checked = item.pst.value,
-            onCheckedChange = {
-                item.pst.value = !item.pst.value
-                updateCallback()
-            },
-            modifier = Modifier.width(50.dp).height(30.dp).align(Alignment.CenterVertically)
         )
         // remove button
         Icon(
@@ -89,7 +59,7 @@ fun ItemRow(
                 .align(Alignment.CenterVertically)
                 .padding(start = 5.dp)
                 .clickable{
-                    removeCallback(item)
+                    removeCallback(person)
                 },
             tint = Color.Red
         )
