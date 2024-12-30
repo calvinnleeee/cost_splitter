@@ -52,7 +52,7 @@ fun Home(navCtrl: NavController, viewModel: MyViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Gray)
+            .background(Color.LightGray)
             .padding(horizontal = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -103,31 +103,90 @@ fun Home(navCtrl: NavController, viewModel: MyViewModel) {
                     .fillMaxWidth()
                     .fillMaxHeight()
             ) {
+                // precalculate the costs
+                val costs = mutableFloatListOf()
+                var split_total = 0F
+                var bill_total = 0F
+                for (i in 0..<calcState.items.size) {
+                    val base_cost = calcState.items[i].price.value
+                    val item_gst = if (calcState.items[i].gst.value) base_cost * 0.05F else 0F
+                    val item_pst = if (calcState.items[i].pst.value) base_cost * 0.1F else 0F
+                    val total_cost = base_cost + item_gst + item_pst
+
+                    // update bill total
+                    bill_total += total_cost
+
+                    // count the number of people splitting the current item
+                    var num_people = 0
+                    for (j in 0..<calcState.people.size) {
+                        if (calcState.people[j].items[i]) num_people += 1
+                    }
+                    val per_cost = if (num_people != 0) total_cost / num_people else 0F
+                    costs.add(per_cost)
+
+                    // update the total split costs
+                    split_total += (per_cost * num_people)
+                }
+
+                // lazy column for the rows
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-//                        .padding(bottom = 50.dp)
-                    ,horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(bottom = 60.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // precalculate the costs to avoid redundant calculations inside HomeRow
-                    val costs = mutableFloatListOf()
-                    for (i in 0..<calcState.items.size) {
-                        val base_cost = calcState.items[i].price.value
-                        val item_gst = if (calcState.items[i].gst.value) base_cost * 0.05F else 0F
-                        val item_pst = if (calcState.items[i].pst.value) base_cost * 0.1F else 0F
-                        val total_cost = base_cost + item_gst + item_pst
-                        var num_people = 0
-                        // count the number of people splitting the current item
-                        for (j in 0..<calcState.people.size) {
-                            if (calcState.people[j].items[i]) num_people += 1
-                        }
-                        val per_cost = if (num_people != 0) total_cost / num_people else 0F
-                        costs.add(per_cost)
-                    }
-
-                    // a block of rows, one for each person, showing their owed amounts
+                    // row for each person, showing their owed amounts
                     items(calcState.people.size) { idx ->
                         HomeRow(calcState.people[idx], costs)
+                    }
+                }
+
+                // bottom sticky box to show totals
+                Row(
+                    Modifier.height(60.dp).padding(vertical = 5.dp).align(Alignment.BottomCenter)
+                ) {
+                    // left column for taxes
+                    Column(
+                        Modifier.fillMaxWidth(0.5F),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        var gst = 0F
+                        for (item in calcState.items) {
+                            if (item.gst.value) gst += (item.price.value * 0.05F)
+                        }
+                        Text(
+                            "GST: $%.2f".format(gst),
+                            fontSize = 15.sp,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        var pst = 0F
+                        for (item in calcState.items) {
+                            if (item.pst.value) pst += (item.price.value * 0.1F)
+                        }
+                        Text(
+                            "PST: $%.2f".format(pst),
+                            fontSize = 15.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    // right column for bill total and split total
+                    Column(
+                        Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Split total: $%.2f".format(split_total),
+                            fontSize = 15.sp,
+                            color = if (split_total == bill_total) Color.Green else Color.Red,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            "Bill total: $%.2f".format(bill_total),
+                            fontSize = 15.sp,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }

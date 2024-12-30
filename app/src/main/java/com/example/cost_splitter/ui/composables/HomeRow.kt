@@ -35,12 +35,12 @@ fun HomeRow(
 
         Text(
             person.name.value,
-            modifier = Modifier.width(175.dp).padding(start = 10.dp),
+            modifier = Modifier.fillMaxWidth(0.7F).padding(start = 50.dp),
             fontSize = 16.sp
         )
         Text(
             "$%.2f".format(amt),
-            modifier = Modifier.width(100.dp).padding(start = 10.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 10.dp),
             fontSize = 16.sp
         )
     }

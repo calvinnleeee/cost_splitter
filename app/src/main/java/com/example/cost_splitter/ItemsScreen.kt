@@ -77,6 +77,7 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
             if (item.pst.value) pstTotal += (item.price.value * 0.10F)
         }
     }
+    updateTotals()
 
     Column(
         modifier = Modifier
