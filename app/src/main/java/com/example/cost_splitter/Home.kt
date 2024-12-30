@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.cost_splitter.ui.composables.HomeRow
 import com.example.cost_splitter.ui.composables.TopBar
 import com.example.cost_splitter.ui.state.CalcState
 
@@ -50,11 +52,71 @@ fun Home(navCtrl: NavController, viewModel: MyViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Gray)
-            .padding(horizontal = 6.dp)
+            .padding(horizontal = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(Modifier.height(30.dp))
 
+        // header for the window
+        Text(
+            "Definitely not Splitwise",
+            modifier = Modifier
+                .width(200.dp)
+                .padding(vertical = 4.dp),
+            fontSize = 36.sp,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(20.dp))
+
+        // display messages to user if no items and/or no people are added yet
+        if (calcState.items.size == 0 && calcState.people.size == 0) {
+            Text(
+                "No items or people currently added",
+                modifier = Modifier.height(30.dp),
+                fontSize = 20.sp
+            )
+        } else if (calcState.people.size == 0) {
+            Text(
+                "No items currently added",
+                modifier = Modifier.height(30.dp),
+                fontSize = 20.sp
+            )
+        } else if (calcState.items.size == 0) {
+            Text(
+                "No people currently added",
+                modifier = Modifier.height(30.dp),
+                fontSize = 20.sp
+            )
+        } else {
+            // display each person's amount owed and the totals
+            /*
+                Structure:
+                names: amts
+                sum of amts (to check total)
+                gst: amt
+                pst: amt
+                total amt (taxes + total to check with bill)
+             */
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+//                        .padding(bottom = 50.dp)
+                    ,horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(calcState.people.size) { idx ->
+                        val person = calcState.people[idx]
+
+                        HomeRow(person)
+                    }
+                }
+            }
+        }
     }
-
 }
 
 
