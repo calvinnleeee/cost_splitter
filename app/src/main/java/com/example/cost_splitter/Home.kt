@@ -1,5 +1,6 @@
 package com.example.cost_splitter
 
+import androidx.collection.mutableFloatListOf
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -61,12 +62,12 @@ fun Home(navCtrl: NavController, viewModel: MyViewModel) {
         Text(
             "Definitely not Splitwise",
             modifier = Modifier
-                .width(200.dp)
+                .width(250.dp)
                 .padding(vertical = 4.dp),
             fontSize = 36.sp,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(30.dp))
 
         // display messages to user if no items and/or no people are added yet
         if (calcState.items.size == 0 && calcState.people.size == 0) {
@@ -77,13 +78,13 @@ fun Home(navCtrl: NavController, viewModel: MyViewModel) {
             )
         } else if (calcState.people.size == 0) {
             Text(
-                "No items currently added",
+                "No people currently added",
                 modifier = Modifier.height(30.dp),
                 fontSize = 20.sp
             )
         } else if (calcState.items.size == 0) {
             Text(
-                "No people currently added",
+                "No items currently added",
                 modifier = Modifier.height(30.dp),
                 fontSize = 20.sp
             )
@@ -108,108 +109,28 @@ fun Home(navCtrl: NavController, viewModel: MyViewModel) {
 //                        .padding(bottom = 50.dp)
                     ,horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(calcState.people.size) { idx ->
-                        val person = calcState.people[idx]
+                    // precalculate the costs to avoid redundant calculations inside HomeRow
+                    val costs = mutableFloatListOf()
+                    for (i in 0..<calcState.items.size) {
+                        val base_cost = calcState.items[i].price.value
+                        val item_gst = if (calcState.items[i].gst.value) base_cost * 0.05F else 0F
+                        val item_pst = if (calcState.items[i].pst.value) base_cost * 0.1F else 0F
+                        val total_cost = base_cost + item_gst + item_pst
+                        var num_people = 0
+                        // count the number of people splitting the current item
+                        for (j in 0..<calcState.people.size) {
+                            if (calcState.people[j].items[i]) num_people += 1
+                        }
+                        val per_cost = if (num_people != 0) total_cost / num_people else 0F
+                        costs.add(per_cost)
+                    }
 
-                        HomeRow(person)
+                    // a block of rows, one for each person, showing their owed amounts
+                    items(calcState.people.size) { idx ->
+                        HomeRow(calcState.people[idx], costs)
                     }
                 }
             }
         }
     }
 }
-
-
-/*
-// top bar containing reset buttons
-//        TopBar(calcState)
-//        Spacer(Modifier.height(20.dp))
-
-        // main splitting section
-        Column(
-            modifier = Modifier.fillMaxSize().padding(start = 9.dp)
-        ) {
-            // one column per item
-            LazyColumn(
-                Modifier.fillMaxWidth()
-            ) {
-                items(calcState.items.size) {
-                    val idx = it
-                    // item price, gst and hst toggles
-                    Column(
-                        modifier = Modifier
-                            .height(120.dp)
-                            .width(100.dp)
-                            .background(Color.LightGray)
-                    ) {
-                        TextField(
-                            value = calcState.items[idx].price.value,
-                            onValueChange = { v -> calcState.items[idx].price.value = v },
-                            modifier = Modifier
-                                .height(55.dp)
-                                .width(100.dp),
-                            textStyle = TextStyle(fontSize = 14.sp),
-                            placeholder = { Text("$$.$$", fontSize = 14.sp) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            singleLine = true,
-                            shape = RectangleShape
-                        )
-                        // gst checkbox
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Checkbox(
-                                checked = calcState.items[idx].gst.value,
-                                onCheckedChange = {
-                                    calcState.items[idx].gst.value = !calcState.items[idx].gst.value
-                                },
-                                modifier = Modifier.width(50.dp)
-                            )
-                            Checkbox(
-                                checked = calcState.items[idx].hst.value,
-                                onCheckedChange = {
-                                    calcState.items[idx].hst.value = !calcState.items[idx].hst.value
-                                },
-                                modifier = Modifier.width(50.dp)
-                            )
-                        }
-                        // hst checkbox
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Text("GST", fontSize = 12.sp, modifier = Modifier.width(50.dp), textAlign = TextAlign.Center)
-                            Text("HST", fontSize = 12.sp, modifier = Modifier.width(50.dp), textAlign = TextAlign.Center)
-                        }
-                    }
-                    // check boxes for each person
-                    LazyRow() {
-
-                    }
-                }
-            }
-            // one row for the + button for items
-            Row(
-                modifier = Modifier
-                    .height(50.dp)
-                    .padding(start = 15.dp)
-                    .padding(vertical = 3.dp)
-            ) {
-                Button(
-                    shape = CircleShape,
-                    colors = ButtonColors(
-                        Color.LightGray,
-                        Color.LightGray,
-                        Color.Transparent,
-                        Color.Transparent
-                    ),
-                    onClick = { calcState.addItem() }
-                ) {
-                    Text("+", fontSize = 24.sp, color = Color.Black)
-                }
-            }
-            // one row for showing gst and pst
-            // one row for showing total price and price owed by each person
-        }
- */
