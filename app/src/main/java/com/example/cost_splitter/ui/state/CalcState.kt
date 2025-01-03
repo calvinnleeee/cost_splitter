@@ -1,45 +1,53 @@
 package com.example.cost_splitter.ui.state
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.cost_splitter.ui.data.Item
+import com.example.cost_splitter.ui.data.Person
 
 class CalcState: ViewModel() {
     // state list of people and their assigned items
-    var people = mutableStateListOf<MutableList<Boolean>>()
+    var people = mutableStateListOf<Person>()
 
-    // state list of items (Triple of price, gst (5%), pst (7%))
-    var items = mutableStateListOf<Triple<Float, Boolean, Boolean>>()
-
-    // function to clear the items
-    fun clearItems() {
-        items.clear()
-    }
-
-    // function to reset the number of people
-    fun clearPeople() {
-        people.clear()
-    }
+    // state list of items (price, gst applied?, pst applied?)
+    var items = mutableStateListOf<Item>()
 
     // add person
     fun addPerson() {
-        people.add(mutableListOf<Boolean>())
-        while (people.last().size != items.size) {
-            people.last().add(false)
+        people.add(Person(mutableStateOf("person${people.size + 1}"), mutableStateListOf()))
+        while (people.last().items.size != items.size) {
+            people.last().items.add(false)
         }
     }
 
     // remove person
-    fun removePerson(idx: Int) {
-
+    fun removePerson(person: Person) {
+        people.remove(person)
     }
 
     // add item (initially 0.00, no taxes applied)
     fun addItem() {
         // add item and update the people to have an extra row of booleans
+        val newItem = Item(
+            mutableStateOf<String>("item${items.size + 1}"),
+            mutableStateOf<Float>(0.00F),
+            mutableStateOf(false),
+            mutableStateOf(false)
+        )
+        items.add(newItem)
+        for (person in people) {
+            person.items.add(false)
+        }
     }
 
     // remove item
-    fun removeItem(idx: Int) {
-        // remove item at idx, remove the row from people
+    fun removeItem(item: Item) {
+        val row_to_remove = items.indexOf(item)
+        items.remove(item)
+        // remove the row corresponding to this item in every person's list
+        for (person in people) {
+            person.items.removeAt(row_to_remove)
+        }
     }
 }
