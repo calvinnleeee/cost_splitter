@@ -1,6 +1,5 @@
 package com.example.cost_splitter
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,11 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.cost_splitter.ui.composables.ItemPopup
-import com.example.cost_splitter.ui.composables.ItemRow
 import com.example.cost_splitter.ui.composables.PersonPopup
 import com.example.cost_splitter.ui.composables.PersonRow
-import com.example.cost_splitter.ui.data.Item
 import com.example.cost_splitter.ui.data.Person
 
 @Composable
