@@ -1,5 +1,6 @@
 package com.example.cost_splitter.ui.state
 
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,9 @@ class CalcState: ViewModel() {
 
     // state list of items (price, gst applied?, pst applied?)
     var items = mutableStateListOf<Item>()
+
+    // state variable to keep track of tip percentage
+    var tip_pct = mutableIntStateOf(0)
 
     // add person
     fun addPerson() {
@@ -49,5 +53,9 @@ class CalcState: ViewModel() {
         for (person in people) {
             person.items.removeAt(row_to_remove)
         }
+    }
+
+    fun updateTip(pct: Int) {
+        tip_pct.intValue = pct
     }
 }
