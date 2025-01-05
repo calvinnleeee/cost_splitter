@@ -14,12 +14,13 @@ UI wasn't a focus; I didn't make this to be pretty, just something easy on the e
 # Preview
 
 ## Home screen
-<img src="./imgs/home1.jpg" alt="Empty home screen" width="220"/>  <img src="./imgs/home2.jpg" alt="People and items" width="220"/>  <img src="./imgs/home3.jpg" alt="Incorrect total" width="220"/>
+<img src="./imgs/home1.jpg" alt="Empty home screen" width="220"/>  <img src="./imgs/home2_2.jpg" alt="People and items" width="220"/>  <img src="./imgs/home3_2.jpg" alt="Incorrect total" width="220"/>
 
 * shows a message if items and/or people not yet added
 * highlights the split total in red if an item hasn't been assigned to any person yet
 * highlights the split total in green if all items have been assigned to at least one person
 * shows the tax amounts and total amount of the bill to compare with the actual bill
+* tip button to change tip percentage, new amounts instantly reflected at the bottom after confirmation
 
 ## Items
 <img src="./imgs/items1.jpg" alt="No items added" width="220"/>  <img src="./imgs/items3.jpg" alt="Items added" width="220"/>  <img src="./imgs/items2.jpg" alt="Item popup" width="220"/>
