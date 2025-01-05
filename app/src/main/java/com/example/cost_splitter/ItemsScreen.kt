@@ -1,6 +1,5 @@
 package com.example.cost_splitter
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -200,7 +199,6 @@ fun ItemsScreen(navCtrl: NavController, vm: MyViewModel) {
         }
 
         if (popup) {
-            Log.i("info", "item to edit is ${item_to_edit.value}")
             if (item_to_edit.value != null) {
                 ItemPopup(item_to_edit.value, togglePopup, updateTotals)
             }
