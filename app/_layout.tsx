@@ -1,14 +1,14 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import React from 'react';
+import React, { createContext } from 'react';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { Person, Item, State } from '@/assets/types';
-import { StateContext } from '@/context/context';
+import { stateContext } from '@/context/context';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -20,7 +20,8 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  const state = StateContext;
+  const [state, setState] = useState(State);
+  const myState = stateContext;
 
   useEffect(() => {
     if (loaded) {
@@ -33,7 +34,7 @@ export default function RootLayout() {
   }
 
   return (
-    <state.Provider value={State}>
+    <myState.Provider value={state}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -41,6 +42,6 @@ export default function RootLayout() {
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
-    </state.Provider>
+    </myState.Provider>
   );
 }

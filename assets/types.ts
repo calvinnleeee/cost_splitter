@@ -30,37 +30,44 @@ export const State = {
   people: [] as Person[],
   items: [] as Item[],
 
+  // constructor() {
+  //   this.people = [];
+  //   this.items = [];
+  // }
+
   // Add a new person and make their items array the same length as the number of items tracked.
-  addPerson: (name: string) => {
-    State.people.push(new Person(name));
-    while (State.people[State.people.length - 1].items.length < State.items.length) {
-      State.people[State.people.length - 1].items.push(false);
+  addPerson(name: string) {
+    this.people.push(new Person(name));
+    while (this.people[this.people.length - 1].items.length < this.items.length) {
+      this.people[this.people.length - 1].items.push(false);
     }
   },
 
   // Remove a person from the list.
-  deletePerson: (person: Person) => {
-    State.people = State.people.filter((p) => p !== person);
+  deletePerson(person: Person) {
+    this.people = this.people.filter((p) => p !== person);
   },
 
   // Add a new item and make the items array of each person the same length as the number of items tracked.
-  addItem: (name: string) => {
-    State.items.push(new Item(name));
-    State.people.forEach((person) => {
-      while (person.items.length < State.items.length) {
+  addItem(name: string) {
+    this.items.push(new Item(name));
+    this.people.forEach((person) => {
+      while (person.items.length < this.items.length) {
         person.items.push(false);
       }
     });
   },
 
   // Remove an item from the list.
-  deleteItem: (item: Item) => {
-    let idx = State.items.indexOf(item);
-    State.items = State.items.filter((i) => i !== item);
-    State.people.forEach((person) => {
+  deleteItem(item: Item) {
+    let idx = this.items.indexOf(item);
+    this.items = this.items.filter((i) => i !== item);
+    this.people.forEach((person) => {
       person.items = person.items.filter((_, index) => index !== idx);
     });
   },
 
-  
+  getLength() {
+    console.log(`len: ${this.people.length}`);
+  },
 }
