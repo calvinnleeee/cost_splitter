@@ -17,6 +17,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: true,
         title: 'Not Splitwise lol',
+        headerTitleAlign: 'center',
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
@@ -26,9 +27,24 @@ export default function TabLayout() {
           },
           default: {},
         }),
+        tabBarHideOnKeyboard: true,
       }}>
       <Tabs.Screen
         name="index"
+        options={{
+          href: null,
+          tabBarItemStyle: { display: 'none' }
+        }}
+      />
+      <Tabs.Screen
+        name="people"
+        options={{
+          title: "People",
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="home"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
@@ -39,13 +55,6 @@ export default function TabLayout() {
         options={{
           title: 'Items',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="bag.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="people"
-        options={{
-          title: 'People',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle.fill" color={color} />,
         }}
       />
     </Tabs>

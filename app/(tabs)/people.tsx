@@ -1,109 +1,151 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import { StyleSheet, View, Text, FlatList } from 'react-native';
+import { TextInput, TouchableOpacity, KeyboardAvoidingView, Platform} from 'react-native';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from 'react-native';
+
+import { useContext, useEffect, useState } from 'react';
+import { stateContext } from '@/context/context';
+
+import { Person, Item, State } from '@/assets/types';
 
 export default function TabTwoScreen() {
+  const colors = useColorScheme() === 'dark' ? Colors.dark : Colors.light;
+  const state = useContext(stateContext);
+  const [people, setPeople] = useState(state.people);
+  const [items, setItems] = useState(state.items);
+
+  useEffect(() => {
+    state.people = people;
+  }, [people]);
+
+  useEffect(() => {
+    state.items = items;
+  }, [items]);
+
+  const theme = StyleSheet.create({
+    text: {
+      color: colors.text,
+    },
+    bg: {
+      backgroundColor: colors.background,
+    },
+    border: {
+      borderColor: colors.tint,
+    },
+    button: {
+      backgroundColor: colors.icon,
+    }
+  });
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <KeyboardAvoidingView
+      behavior = {Platform.OS === 'ios'? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 80}
+      style = {{flex : 1}}
+    >
+    <ThemedView
+      style={styles.main}
+    >
+      {/* Title */}
+      <ThemedText style={[styles.text, {marginBottom: 20}]}>Add/Remove Friends lol</ThemedText>
+
+      {/* Add friend button */}
+      <TouchableOpacity
+        style={[styles.button, theme.button]}
+        onPress={() => {
+          setPeople([...people, new Person(`Person ${people.length}`)]);
+        }}
+      >
+        <Text style={[theme.text, {alignSelf: 'center'}]}>Add friend</Text>
+      </TouchableOpacity>
+
+      {/* Reset button */}
+      <TouchableOpacity
+        style={[styles.button, theme.button]}
+        onPress={() => {
+          setPeople([]);
+        }}
+      >
+        <Text style={[theme.text, {alignSelf: 'center'}]}>Reset friends :(</Text>
+      </TouchableOpacity>
+
+      {/* Display message or list depending on list length */}
+      {people.length == 0 ? (
+        <ThemedText style={[styles.text, {marginTop: 20}]}>No friends yet :'(</ThemedText>
+      ) : (
+        <FlatList
+          data={people}
+          style={styles.list}
+          renderItem={({ item }) => (
+            <View style={[styles.listItem, theme.border]}>
+              {/* Replace textinput to text, make clickable for modal */}
+              <TextInput
+                style={[styles.input, theme.text]}
+                placeholder="Enter the person's name"
+                onChangeText={(text) => item.name = text}
+                selectTextOnFocus={true}
+                defaultValue={item.name}
+              />
+
+              <TouchableOpacity
+                style={styles.delete}
+                onPress={() => {
+                  setPeople(people.filter((p) => p !== item));
+                }}
+              >
+                <Text style={{color: 'red', paddingTop: 15, textAlign: 'center'}}>X</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          keyExtractor={(item) => people.indexOf(item).toString()}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+      )}
+      
+    </ThemedView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  main: {
+    paddingVertical: 10,
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 6,
   },
-  titleContainer: {
+  text: {
+    fontSize: 20,
+  },
+  button: {
+    borderRadius: 10,
+    width: 100,
+    padding: 10,
+  },
+  list: {
+    marginVertical: 20,
+    paddingHorizontal: 20,
+    width: '80%',
+    height: 500,
+    borderRadius: 5,
+  },
+  listItem: {
     flexDirection: 'row',
-    gap: 8,
+    height: 60,
+    paddingVertical: 5,
+    borderBottomWidth: 1,
   },
+  input: {
+    fontSize: 18,
+    height: 50,
+    width: '70%',
+  },
+  delete: {
+    width: 50,
+    height: 50,
+    marginLeft: 10,
+  }
 });

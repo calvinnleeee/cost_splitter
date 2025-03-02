@@ -2,7 +2,7 @@
 // items they are paying for.
 export class Person {
   name: string;
-  items: boolean[];
+  items: Item[];
 
   constructor(name: string) {
     this.name = name;
@@ -17,12 +17,14 @@ export class Item {
   price: number;
   gst: boolean;
   pst: boolean;
+  payers: Person[];
 
   constructor(name: string) {
     this.name = name;
     this.price = 0;
     this.gst = false;
     this.pst = false;
+    this.payers = [];
   }
 }
 
@@ -38,9 +40,6 @@ export const State = {
   // Add a new person and make their items array the same length as the number of items tracked.
   addPerson(name: string) {
     this.people.push(new Person(name));
-    while (this.people[this.people.length - 1].items.length < this.items.length) {
-      this.people[this.people.length - 1].items.push(false);
-    }
   },
 
   // Remove a person from the list.
@@ -51,23 +50,23 @@ export const State = {
   // Add a new item and make the items array of each person the same length as the number of items tracked.
   addItem(name: string) {
     this.items.push(new Item(name));
-    this.people.forEach((person) => {
-      while (person.items.length < this.items.length) {
-        person.items.push(false);
-      }
-    });
   },
 
   // Remove an item from the list.
   deleteItem(item: Item) {
-    let idx = this.items.indexOf(item);
     this.items = this.items.filter((i) => i !== item);
     this.people.forEach((person) => {
-      person.items = person.items.filter((_, index) => index !== idx);
+      person.items = person.items.filter((i) => i !== item);
     });
   },
 
   getLength() {
     console.log(`len: ${this.people.length}`);
+  },
+
+  getNames() {
+    this.people.forEach((person) => {
+      console.log(person.name);
+    });
   },
 }
