@@ -28,9 +28,9 @@ export class Item {
   }
 }
 
-export const State = {
-  people: [] as Person[],
-  items: [] as Item[],
+export interface State {
+  people: Person[],
+  items: Item[],
 
   // constructor() {
   //   this.people = [];
@@ -38,35 +38,35 @@ export const State = {
   // }
 
   // Add a new person and make their items array the same length as the number of items tracked.
-  addPerson(name: string) {
-    this.people.push(new Person(name));
-  },
+  // addPerson(name: string) {
+  //   this.people.push(new Person(name));
+  // },
 
   // Remove a person from the list.
-  deletePerson(person: Person) {
-    this.people = this.people.filter((p) => p !== person);
-  },
+  // deletePerson(person: Person) {
+  //   this.people = this.people.filter((p) => p !== person);
+  // },
 
   // Add a new item and make the items array of each person the same length as the number of items tracked.
-  addItem(name: string) {
-    this.items.push(new Item(name));
-  },
+  // addItem(name: string) {
+  //   this.items.push(new Item(name));
+  // },
 
   // Remove an item from the list.
-  deleteItem(item: Item) {
-    this.items = this.items.filter((i) => i !== item);
-    this.people.forEach((person) => {
-      person.items = person.items.filter((i) => i !== item);
-    });
-  },
+  // deleteItem(item: Item) {
+  //   this.items = this.items.filter((i) => i !== item);
+  //   this.people.forEach((person) => {
+  //     person.items = person.items.filter((i) => i !== item);
+  //   });
+  // },
 
-  getLength() {
-    console.log(`len: ${this.people.length}`);
-  },
+  // getLength() {
+  //   console.log(`len: ${this.people.length}`);
+  // },
 
-  getNames() {
-    this.people.forEach((person) => {
-      console.log(person.name);
-    });
-  },
+  // getNames() {
+  //   this.people.forEach((person) => {
+  //     console.log(person.name);
+  //   });
+  // },
 }

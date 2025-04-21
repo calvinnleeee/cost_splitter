@@ -7,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 
 import { useContext, useEffect, useState } from 'react';
-import { stateContext } from '@/context/context';
+import { stateContext } from '@/context/StateContext';
 
 import { Person, Item, State } from '@/assets/types';
 
