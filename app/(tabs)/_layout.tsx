@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React, { useContext } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Touchable, TouchableOpacity } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -13,7 +13,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 export default function TabLayout() {
 
   const colorScheme = useColorScheme();
-  const { theme } = useContext(ThemeContext);
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const themeColors = theme === ColorTheme.system ? Colors[colorScheme ?? 'light'] : Colors[theme];
 
   return (
@@ -25,6 +25,24 @@ export default function TabLayout() {
         headerTintColor: themeColors.text,
         headerTitle: 'Not Splitwise',
         headerTitleAlign: 'center',
+        headerRight: () => 
+          <TouchableOpacity
+            onPressIn={() => {
+              if (theme === ColorTheme.dark) {
+                toggleTheme(ColorTheme.light);
+              } else {
+                toggleTheme(ColorTheme.dark);
+              }
+            }}
+            style={{ width: 30, height: 30, padding: 0, marginRight: 20 }}
+          >
+          {theme === ColorTheme.dark ? (
+            <IconSymbol size={28} name="sun.max.circle.fill" color={'white'} style={{zIndex: 2}}/>
+          ) : (
+            <IconSymbol size={28} name="moon.fill" color={'black'} style={{zIndex: 2}} />
+          )}
+          </TouchableOpacity>
+        ,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({

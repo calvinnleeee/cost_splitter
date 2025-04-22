@@ -338,6 +338,8 @@ const styles = StyleSheet.create({
   modalCheckbox: {
     marginLeft: 15,
     marginBottom: 10,
+    width: 25,
+    height: 25,
   },
   modalButtons: {
     alignSelf: 'center',

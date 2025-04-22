@@ -15,6 +15,8 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'person.crop.circle.fill': 'account-circle',
   'bag.fill': 'shopping-bag',
+  'sun.max.circle.fill': 'wb-sunny',
+  'moon.fill': 'nights-stay',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
