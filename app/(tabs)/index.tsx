@@ -1,5 +1,10 @@
-import { Redirect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { Text } from 'react-native';
 
 export default function Index() {
-  return <Redirect href="/home" />;  
+  const router = useRouter();
+  useFocusEffect(() => {
+    router.replace('/home');
+  });
+  return <Text>Redirecting...</Text>;  
 }

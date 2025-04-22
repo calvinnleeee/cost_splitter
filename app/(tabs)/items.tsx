@@ -1,14 +1,10 @@
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Modal, Dimensions, Button } from 'react-native';
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-import { useEffect, useState } from 'react';
-
-
-import { Person, Item, State } from '@/assets/types';
-import pageInit from '@/assets/init';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Dimensions } from 'react-native';
 import Checkbox from 'expo-checkbox';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { Item } from '@/assets/types';
+import pageInit from '@/assets/init';
 
 export default function ItemsScreen() {
   const { state, themeColors } = pageInit();
@@ -27,6 +23,12 @@ export default function ItemsScreen() {
     state.items = items;
   }, [items]);
 
+  // Save the state using async storage when a change is made,
+  // so it can persist after app restarts.
+  useEffect(() => {
+    AsyncStorage.setItem('state', JSON.stringify(state))
+  }, [state]);
+
   // Set modal variables when user clicks add item button
   const openModal = (item: Item) => {
     setItemToEdit(item);
@@ -35,7 +37,7 @@ export default function ItemsScreen() {
     setModalGST(item.gst);
     setModalPST(item.pst);
     setModalVisible(true);
-  }
+  };
 
   // Clear modal variables when modal is closed
   const closeModal = () => {
@@ -44,7 +46,7 @@ export default function ItemsScreen() {
     setModalGST(false);
     setModalPST(false);
     setModalVisible(false);
-  }
+  };
 
   // Add the item to the list or update the existing item
   const updateItem = () => {
@@ -58,7 +60,7 @@ export default function ItemsScreen() {
       }
       closeModal();
     }
-  }
+  };
 
   const theme = StyleSheet.create({
     text: {
@@ -81,11 +83,11 @@ export default function ItemsScreen() {
     //   keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 80}
     //   style = {{flex : 1}}
     // >
-    <ThemedView
-      style={styles.main}
+    <View
+      style={[styles.main, theme.bg]}
     >
       {/* Title */}
-      <ThemedText style={{fontSize: 24, marginVertical: 20}}>Manage items</ThemedText>
+      <Text style={[styles.title, theme.text]}>Manage items</Text>
 
       {/* Add item button */}
       <View style={{flexDirection: 'row', width: '80%', justifyContent: 'space-evenly'}}>
@@ -120,14 +122,14 @@ export default function ItemsScreen() {
 
       {/* Display message or list depending on list length */}
       {items.length == 0 ? (
-        <ThemedText style={[styles.text, {marginTop: 20}]}>No items added</ThemedText>
+        <Text style={[styles.text, theme.text, {marginTop: 20}]}>No items added</Text>
       ) : (
         <FlatList
           data={items}
           style={styles.list}
           renderItem={({ item }) => (
             <View style={[styles.listItem, theme.border]}>
-              {/* Item label and price */}
+              {/* Item name and price */}
               <TouchableOpacity
                 style={{flex: 7, flexDirection: 'column'}}
                 onPress={() => {
@@ -162,12 +164,12 @@ export default function ItemsScreen() {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          setModalVisible(false);
+          closeModal();
         }}
       >
         <TouchableOpacity
           style={{width: '100%', height: windowHeight}}
-          onPressOut={() => setModalVisible(false)}
+          onPressOut={() => closeModal()}
         >
           <TouchableOpacity
             style={[styles.modal, { borderColor: themeColors.text, backgroundColor: themeColors.background}]}
@@ -193,10 +195,12 @@ export default function ItemsScreen() {
               onChangeText={setNewPrice}
               selectTextOnFocus={true}
               value={newPrice}
-              inputMode='decimal'
+              inputMode='numeric'
             />
 
             {/* Checkboxes for item's GST/PST */}
+            {itemToEdit &&
+            <>
             <Text style={[styles.text, theme.text]}>GST</Text>
             <Checkbox
               style={styles.modalCheckbox}
@@ -209,6 +213,7 @@ export default function ItemsScreen() {
               value={modalPST}
               onValueChange={setModalPST}
             />
+            </>}
 
             {/* Accept and cancel/exit buttons */}
             <View style={styles.modalButtons}>
@@ -216,7 +221,6 @@ export default function ItemsScreen() {
                 style={[styles.button, theme.button]}
                 onPress={() => {
                   // Check the inputs, then update the item
-                  console.log(`New name: ${newName}`);
                   if (newName.trim().length == 0) {
                     alert('Name must contain at least one non-whitespace character.');
                     return;
@@ -242,7 +246,7 @@ export default function ItemsScreen() {
         </TouchableOpacity>
       </Modal>
 
-    </ThemedView>
+    </View>
     // </KeyboardAvoidingView>
   );
 }
@@ -255,6 +259,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     gap: 6,
+  },
+  title: {
+    fontSize: 24,
+    marginVertical: 10
   },
   text: {
     fontSize: 20,

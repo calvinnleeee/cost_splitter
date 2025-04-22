@@ -2,11 +2,9 @@
 // items they are paying for.
 export class Person {
   name: string;
-  items: Item[];
 
   constructor(name: string) {
     this.name = name;
-    this.items = [];
   }
 
 }

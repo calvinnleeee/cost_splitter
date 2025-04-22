@@ -36,11 +36,11 @@ export default function TabLayout() {
         }),
         tabBarHideOnKeyboard: true,
       }}>
-      <Tabs.Screen
-        name="index"
+        <Tabs.Screen
+        name="home"
         options={{
-          href: null,
-          tabBarItemStyle: { display: 'none' }
+          title: 'Home',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -51,17 +51,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="home"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="people"
         options={{
           title: "People",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.crop.circle.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+          tabBarItemStyle: { display: 'none' }
         }}
       />
     </Tabs>
