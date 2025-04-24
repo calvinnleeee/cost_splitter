@@ -14,57 +14,42 @@ export class Item {
   name: string;
   price: number;
   gst: boolean;
-  pst: boolean;
+  pst7: boolean;
+  pst10: boolean;
   payers: Person[];
 
   constructor(name: string) {
     this.name = name;
     this.price = 0;
     this.gst = false;
-    this.pst = false;
+    this.pst7 = false;
+    this.pst10 = false;
     this.payers = [];
+  }
+
+  getPrice() {
+    return this.price
+      + (this.gst ? this.price * 0.05 : 0)
+      + (this.pst7 ? this.price * 0.07 : 0)
+      + (this.pst10 ? this.price * 0.10 : 0);
+  }
+
+  getTax() {
+    return (this.gst ? this.price * 0.05 : 0)
+      + (this.pst7 ? this.price * 0.07 : 0)
+      + (this.pst10 ? this.price * 0.10 : 0);
+  }
+
+  getGST() {
+    return this.gst ? this.price * 0.05 : 0;
+  }
+
+  getPST() {
+    return (this.pst7 ? this.price * 0.07 : 0) + (this.pst10 ? this.price * 0.10 : 0);
   }
 }
 
 export interface State {
   people: Person[],
   items: Item[],
-
-  // constructor() {
-  //   this.people = [];
-  //   this.items = [];
-  // }
-
-  // Add a new person and make their items array the same length as the number of items tracked.
-  // addPerson(name: string) {
-  //   this.people.push(new Person(name));
-  // },
-
-  // Remove a person from the list.
-  // deletePerson(person: Person) {
-  //   this.people = this.people.filter((p) => p !== person);
-  // },
-
-  // Add a new item and make the items array of each person the same length as the number of items tracked.
-  // addItem(name: string) {
-  //   this.items.push(new Item(name));
-  // },
-
-  // Remove an item from the list.
-  // deleteItem(item: Item) {
-  //   this.items = this.items.filter((i) => i !== item);
-  //   this.people.forEach((person) => {
-  //     person.items = person.items.filter((i) => i !== item);
-  //   });
-  // },
-
-  // getLength() {
-  //   console.log(`len: ${this.people.length}`);
-  // },
-
-  // getNames() {
-  //   this.people.forEach((person) => {
-  //     console.log(person.name);
-  //   });
-  // },
 }

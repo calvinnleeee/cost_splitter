@@ -6,14 +6,14 @@ import { useColorScheme } from 'react-native';
 
 const pageInit = () => {
   // Get the state from context, storing all the people and items
-  const { state } = useContext(StateContext);
+  const { state, updatePeople, updateItems } = useContext(StateContext);
 
   // Get theme variables
   const colorScheme = useColorScheme();
   const { theme } = useContext(ThemeContext);
   const themeColors = theme === ColorTheme.system ? Colors[colorScheme ?? 'light'] : Colors[theme];
 
-  return {state, themeColors};
+  return {state, themeColors, updatePeople, updateItems};
 }
 
 export default pageInit;

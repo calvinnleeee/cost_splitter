@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Dimensions, Alert } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,27 +7,16 @@ import { Item } from '@/assets/types';
 import pageInit from '@/assets/init';
 
 export default function ItemsScreen() {
-  const { state, themeColors } = pageInit();
+  const { state, themeColors, updateItems, updatePeople } = pageInit();
   const windowHeight = Dimensions.get('window').height;
 
-  const [items, setItems] = useState<Item[]>(state.items);
   const [modalVisible, setModalVisible] = useState(false);
   const [itemToEdit, setItemToEdit] = useState<Item | null>(null);
   const [newName, setNewName] = useState<string>('');
   const [newPrice, setNewPrice] = useState<string>('');
   const [modalGST, setModalGST] = useState<boolean>(false);
-  const [modalPST, setModalPST] = useState<boolean>(false);
-
-  // Update state object when the items list changes
-  useEffect(() => {
-    state.items = items;
-  }, [items]);
-
-  // Save the state using async storage when a change is made,
-  // so it can persist after app restarts.
-  useEffect(() => {
-    AsyncStorage.setItem('state', JSON.stringify(state))
-  }, [state]);
+  const [modalPST7, setModalPST7] = useState<boolean>(false);
+  const [modalPST10, setModalPST10] = useState<boolean>(false);
 
   // Set modal variables when user clicks add item button
   const openModal = (item: Item) => {
@@ -35,7 +24,8 @@ export default function ItemsScreen() {
     setNewName(item.name);
     setNewPrice(item.price.toFixed(2));
     setModalGST(item.gst);
-    setModalPST(item.pst);
+    setModalPST7(item.pst7);
+    setModalPST10(item.pst10);
     setModalVisible(true);
   };
 
@@ -44,7 +34,8 @@ export default function ItemsScreen() {
     setNewName('');
     setNewPrice('');
     setModalGST(false);
-    setModalPST(false);
+    setModalPST7(false);
+    setModalPST10(false);
     setModalVisible(false);
   };
 
@@ -54,107 +45,98 @@ export default function ItemsScreen() {
       itemToEdit.name = newName;
       itemToEdit.price = parseFloat(newPrice);
       itemToEdit.gst = modalGST;
-      itemToEdit.pst = modalPST;
-      if (!items.includes(itemToEdit)) {
-        setItems([...items, itemToEdit]);
+      itemToEdit.pst7 = modalPST7;
+      itemToEdit.pst10 = modalPST10;
+      if (!state.items.includes(itemToEdit)) {
+        updateItems([...state.items, itemToEdit]);
+      } else {
+        updateItems([...state.items]);
       }
       closeModal();
     }
   };
 
-  const theme = StyleSheet.create({
-    text: {
-      color: themeColors.text,
-    },
-    bg: {
-      backgroundColor: themeColors.background,
-    },
-    border: {
-      borderColor: themeColors.primary,
-    },
-    button: {
-      backgroundColor: themeColors.primary,
-    }
-  });
+  // Remove the item from the list
+  const removeItem = (item: Item) => {
+    updateItems(state.items.filter((i) => i !== item));
+  }
+
 
   return (
-    // <KeyboardAvoidingView
-    //   behavior = {Platform.OS === 'ios'? "padding" : "height"}
-    //   keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 80}
-    //   style = {{flex : 1}}
-    // >
     <View
-      style={[styles.main, theme.bg]}
+      style={[styles.main, {backgroundColor: themeColors.background}]}
     >
       {/* Title */}
-      <Text style={[styles.title, theme.text]}>Manage items</Text>
+      <Text style={[styles.title, {color: themeColors.text}]}>Manage items</Text>
 
       {/* Add item button */}
       <View style={{flexDirection: 'row', width: '80%', justifyContent: 'space-evenly'}}>
         <TouchableOpacity
-          style={[styles.button, theme.button]}
+          style={[styles.button, {backgroundColor: themeColors.primary}]}
           onPress={() => {
             const newItem = new Item(`New item`);
             setItemToEdit(newItem);
             setModalVisible(true);
           }}
         >
-          <Text style={[theme.text, {alignSelf: 'center'}]}>Add item</Text>
+          <Text style={{color: themeColors.text, alignSelf: 'center'}}>Add item</Text>
         </TouchableOpacity>
 
         {/* Reset button */}
         <TouchableOpacity
-          style={[styles.button, theme.button]}
-          onPress={() => {
-            setItems([]);
-          }}
+          style={[styles.button, {backgroundColor: themeColors.primary}]}
+          onPress={() => {updateItems([])}}
         >
-          <Text style={[theme.text, {alignSelf: 'center'}]}>Reset items</Text>
+          <Text style={{color: themeColors.text, alignSelf: 'center'}}>Reset items</Text>
         </TouchableOpacity>
       </View>
 
       {/* Display subtotal and tax amounts */}
-      {items.length > 0 && <View style={[styles.subtotal]}>
-        <Text style={[styles.sub, theme.text]}>{`Subtotal\n$`}{items.reduce((acc, item) => acc + item.price, 0).toFixed(2)}</Text>
-        <Text style={[styles.sub, theme.text]}>{`GST\n$`}{(items.reduce((acc, item) => acc + (item.gst ? item.price * 0.05 : 0), 0)).toFixed(2)}</Text>
-        <Text style={[styles.sub, theme.text]}>{`PST\n$`}{(items.reduce((acc, item) => acc + (item.pst ? item.price * 0.10 : 0), 0)).toFixed(2)}</Text>
+      {state.items.length > 0 && <View style={styles.subtotal}>
+        <Text style={[styles.sub, {color: themeColors.text}]}>
+          {`Subtotal\n$`}{state.items.reduce((acc, item) => acc + item.price, 0).toFixed(2)}
+        </Text>
+        <Text style={[styles.sub, {color: themeColors.text}]}>
+          {`GST\n$`}{(state.items.reduce((acc, item) => acc + (item.gst ? item.price * 0.05 : 0), 0)).toFixed(2)}
+        </Text>
+        <Text style={[styles.sub, {color: themeColors.text}]}>
+          {`PST\n$`}{(state.items.reduce((acc, item) => acc + (item.pst7 ? item.price * 0.07 : 0) + (item.pst10 ? item.price * 0.10 : 0), 0)).toFixed(2)}
+        </Text>
       </View>}
 
       {/* Display message or list depending on list length */}
-      {items.length == 0 ? (
-        <Text style={[styles.text, theme.text, {marginTop: 20}]}>No items added</Text>
+      {state.items.length == 0 ? (
+        <Text style={[styles.text, {color: themeColors.text, marginTop: 20}]}>No items added</Text>
       ) : (
         <FlatList
-          data={items}
+          data={state.items}
           style={styles.list}
           renderItem={({ item }) => (
-            <View style={[styles.listItem, theme.border]}>
+            <View style={[styles.listItem, {borderColor: themeColors.primary}]}>
               {/* Item name and price */}
               <TouchableOpacity
                 style={{flex: 7, flexDirection: 'column'}}
-                onPress={() => {
-                  openModal(item);
-                }}
+                onPress={() => {openModal(item)}}
               >
-                <Text style={[styles.input, theme.text]}>{item.name}</Text>
+                <Text style={[styles.input, {color: themeColors.text}]}>{item.name}</Text>
                 <View style={{flexDirection: 'row'}}>
-                  <Text style={[styles.subinput]}>{`$${item.price.toFixed(2)}`}</Text>
-                  {item.gst && <Text style={[styles.subinput]}>{` + ${(item.price*0.05).toFixed(2)} (GST)`}</Text>}
-                  {item.pst && <Text style={[styles.subinput]}>{` + ${(item.price*0.10).toFixed(2)} (PST)`}</Text>}
+                  <Text style={styles.subinput}>{`$${item.price.toFixed(2)}`}</Text>
+                  {item.gst && <Text style={styles.subinput}>{` + ${(item.getGST()).toFixed(2)} (GST)`}</Text>}
+                  {(item.pst7 || item.pst10) && <Text style={styles.subinput}>{` + ${(item.getPST()).toFixed(2)} (PST)`}</Text>}
                 </View>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.delete}
                 onPress={() => {
-                  setItems(items.filter((i) => i !== item));
+                  removeItem(item);
                 }}
               >
                 <Text style={{color: 'red', paddingTop: 15, textAlign: 'center'}}>X</Text>
               </TouchableOpacity>
             </View>
           )}
-          keyExtractor={(item) => items.indexOf(item).toString()}
+          keyExtractor={(item) => state.items.indexOf(item).toString()}
         />
       )}
       
@@ -163,9 +145,7 @@ export default function ItemsScreen() {
         animationType='fade'
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          closeModal();
-        }}
+        onRequestClose={() => {closeModal()}}
       >
         <TouchableOpacity
           style={{width: '100%', height: windowHeight}}
@@ -176,7 +156,7 @@ export default function ItemsScreen() {
             activeOpacity={1}
           >
             {/* Edit item name */}
-            <Text style={[styles.modalLabel, theme.text]}>Item name</Text>
+            <Text style={[styles.modalLabel, {color: themeColors.text}]}>Item name</Text>
             <TextInput
               style={[styles.modalInput, {color: themeColors.text}]}
               placeholder="Enter the item's name"
@@ -187,7 +167,7 @@ export default function ItemsScreen() {
             />
 
             {/* Edit item's price */}
-            <Text style={[styles.text, theme.text]}>Price</Text>
+            <Text style={[styles.modalLabel, {color: themeColors.text}]}>Price</Text>
             <TextInput
               style={[styles.modalInput, {color: themeColors.text}]}
               placeholder="Enter the item's price"
@@ -200,45 +180,57 @@ export default function ItemsScreen() {
 
             {/* Checkboxes for item's GST/PST */}
             {itemToEdit &&
-            <>
-            <Text style={[styles.text, theme.text]}>GST</Text>
-            <Checkbox
-              style={styles.modalCheckbox}
-              value={modalGST}
-              onValueChange={setModalGST}
-            />
-            <Text style={[styles.text, theme.text]}>PST</Text>
-            <Checkbox
-              style={styles.modalCheckbox}
-              value={modalPST}
-              onValueChange={setModalPST}
-            />
-            </>}
+            <View style={styles.modalCheckboxView}>
+              <View style={styles.checkboxContainer}>
+                <Text style={{color: themeColors.text, fontSize: 16}}>{`GST\n(5%)`}</Text>
+                <Checkbox
+                  style={styles.modalCheckbox}
+                  value={modalGST}
+                  onValueChange={setModalGST}
+                />
+              </View>
+              <View style={styles.checkboxContainer}>
+                <Text style={{color: themeColors.text, fontSize: 16}}>{`PST\n(7%)`}</Text>
+                <Checkbox
+                  style={styles.modalCheckbox}
+                  value={modalPST7}
+                  onValueChange={setModalPST7}
+                />
+              </View>
+              <View style={styles.checkboxContainer}>
+                <Text style={{color: themeColors.text, fontSize: 16}}>{`PST\n(10%)`}</Text>
+                <Checkbox
+                  style={styles.modalCheckbox}
+                  value={modalPST10}
+                  onValueChange={setModalPST10}
+                />
+              </View>
+            </View>}
 
             {/* Accept and cancel/exit buttons */}
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.button, theme.button]}
+                style={[styles.button, {backgroundColor: themeColors.primary}]}
                 onPress={() => {
                   // Check the inputs, then update the item
                   if (newName.trim().length == 0) {
-                    alert('Name must contain at least one non-whitespace character.');
+                    Alert.alert('Name must contain at least one non-whitespace character.');
                     return;
                   }
                   if (isNaN(parseFloat(newPrice)) || parseFloat(newPrice) < 0) {
-                    alert('Price must be a positive number.');
+                    Alert.alert('Price must be a positive number.');
                     return;
                   }
                   updateItem();
                 }}
               >
-                <Text style={[theme.text, {alignSelf: 'center'}]}>Confirm</Text>
+                <Text style={{color: themeColors.text, alignSelf: 'center'}}>Confirm</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.button, theme.button]}
+                style={[styles.button, {backgroundColor: themeColors.primary}]}
                 onPress={() => closeModal()}
               >
-                <Text style={[theme.text, {alignSelf: 'center'}]}>Cancel</Text>
+                <Text style={{color: themeColors.text, alignSelf: 'center'}}>Cancel</Text>
               </TouchableOpacity>
 
             </View>
@@ -247,7 +239,6 @@ export default function ItemsScreen() {
       </Modal>
 
     </View>
-    // </KeyboardAvoidingView>
   );
 }
 
@@ -323,8 +314,8 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   modalLabel: {
-    fontSize: 18,
-    marginBottom: 5,
+    fontSize: 20,
+    marginVertical: 5,
   },
   modalInput: {
     width: '90%',
@@ -335,9 +326,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     marginBottom: 10,
   },
+  modalCheckboxView: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    marginVertical: 25,
+  },
+  checkboxContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+  },
   modalCheckbox: {
-    marginLeft: 15,
-    marginBottom: 10,
+    marginTop: 10,
     width: 25,
     height: 25,
   },
@@ -345,6 +347,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: '80%',
     flexDirection: 'row',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
+    gap: 20,
   },
 });
