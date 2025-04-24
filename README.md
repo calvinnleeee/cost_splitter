@@ -1,46 +1,49 @@
-# My own cost splitter
+# Split with Friends :)
 
 I didn't want to download Splitwise so I made my own basic version to split costs with friends.
 
-Every feature and screen was designed to be lightweight so that I can quickly calculate how much each friend owes to the person who fronted the bill.
+Most of the app was designed to be lightweight so that I can quickly calculate how much each friend owes to the person who fronted the bill.
 Everything was made to be easy to understand so if my friends want to use the app, they can understand how to use it without asking for help.
 UI wasn't a focus; I didn't make this to be pretty, just something easy on the eyes and functional.
 
 ## Features
 * add items and change their name, price, tax inclusion (GST and/or PST)
 * add people and allow changing their name and assigning items to them
-* can see at a glance if every item has been assigned and the bill totals and costs for each person
+* quickly share the costs with friends, utilizing the device's share function
 
 # Preview
 
 ## Home screen
-<img src="./imgs/home1.jpg" alt="Empty home screen" width="220"/>  <img src="./imgs/home2_2.jpg" alt="People and items" width="220"/>  <img src="./imgs/home3_2.jpg" alt="Incorrect total" width="220"/>
+<img src="./imgs/home1.png" alt="Empty home screen" width="220"/>  <img src="./imgs/home2.png" alt="People and items" width="220"/>  <img src="./imgs/home3.png" alt="Tip popup" width="220"/>
 
 * shows a message if items and/or people not yet added
-* highlights the split total in red if an item hasn't been assigned to any person yet
-* highlights the split total in green if all items have been assigned to at least one person
-* shows the tax amounts and total amount of the bill to compare with the actual bill
-* tip button to change tip percentage, new amounts instantly reflected at the bottom after confirmation
+* shows all subtotals and total to compare with actual bill
+* tip popup used to change the tip, whether by percentage or by flat amount
+* share button allows sending a text string as a message using phone's sharing capabilities
+* icon on top right allows changing between light and dark mode
 
 ## Items
-<img src="./imgs/items1.jpg" alt="No items added" width="220"/>  <img src="./imgs/items3.jpg" alt="Items added" width="220"/>  <img src="./imgs/items2.jpg" alt="Item popup" width="220"/>
+<img src="./imgs/items1.png" alt="No items added" width="220"/>  <img src="./imgs/items2.png" alt="Item popup" width="220"/>  <img src="./imgs/items3.png" alt="Item added" width="220"/>
 
 * show/manage the items added to the list
 * items can be clicked to open a popup to change its name and price
-* gst and pst can be toggled by clicking the checkbox
+* item price and taxes handled in the popup
 * bill subtotal and gst totals shown at top for quick bill comparison
-* names don't need to be changed if user wants to be quicker with getting the final calculations
 
 ## People
-<img src="./imgs/people1.jpg" alt="No people added" width="220"/>  <img src="./imgs/people2.jpg" alt="People added" width="220"/>  <img src="./imgs/people3.jpg" alt="People popup" width="220"/>
+<img src="./imgs/people1.png" alt="No people added" width="220"/>  <img src="./imgs/people2.png" alt="People popup" width="220"/>  <img src="./imgs/people3.png" alt="Item selection" width="220"/>
 
 * show/manage the people included in the split
 * people can be clicked on to open a popup to change their name and assign items to them
-* assigned items highlighted green to easy
 
 
-# Extra nice things / To-dos
-* A better name and title for the app
-* Better highlighting/outlining of boxes/components in all screens
-* Instant popup on adding a new item/person to allow earlier input of price or item assignment
-* Get someone to do the UI design for me so I can just implement it
+## Version
+Current: 2.0
+
+2.0
+- Ported over the project to React Native, properly utilizing classes and state/content management for easier development/testing
+- Added sharing function to allow sending the bill/breakdown to people
+- Added colour theming
+
+1.0
+- Kotlin version with very basic and boring UI

@@ -73,9 +73,9 @@ export default function HomeScreen() {
       ) : (
         <>
           {/* Subtotals, taxes, and total */}
-          <View>
+          <View style={{width: '100%'}}>
             {/* Display set tip, reset, and save buttons */}
-            <View style={[styles.subtotal, {marginBottom: 5}]}>
+            <View style={[styles.topContainer, {marginBottom: 5}]}>
               <TouchableOpacity
                 style={[styles.button, {backgroundColor: themeColors.primary}]}
                 onPress={() => {
@@ -266,11 +266,18 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'center',
   },
+  topContainer: {
+    width: '80%',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignSelf: 'center',
+  },
   subtotal: {
     fontSize: 16,
     marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
+    alignSelf: 'center',
     width: '80%',
   },
   sub: {
