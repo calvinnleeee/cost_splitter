@@ -23,7 +23,7 @@ export default function TabLayout() {
         headerShown: true,
         headerStyle: { backgroundColor: themeColors.primary },
         headerTintColor: themeColors.text,
-        headerTitle: 'Not Splitwise',
+        headerTitle: 'Split with Friends',
         headerTitleAlign: 'center',
         headerRight: () => 
           <TouchableOpacity
