@@ -5,8 +5,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
-import StateContext, {StateProvider} from '@/context/StateContext';
-import ThemeContext, {ThemeProvider} from '@/context/ThemeContext';
+import {StateProvider} from '@/context/StateContext';
+import {ThemeProvider} from '@/context/ThemeContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ColorTheme, Colors } from '@/assets/themes';
 

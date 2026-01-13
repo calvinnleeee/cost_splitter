@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, PropsWithChildren } from 'react';
+import React, { createContext, useState, useEffect, PropsWithChildren, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ColorTheme } from '@/assets/themes';
 
@@ -38,4 +38,4 @@ export const ThemeProvider = ({children}: PropsWithChildren) => {
   );
 };
 
-export default ThemeContext;
+export const useTheme = () => useContext(ThemeContext);

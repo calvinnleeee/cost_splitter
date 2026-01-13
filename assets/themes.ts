@@ -15,16 +15,16 @@ oxford blue       - #05204A
 
 export const Colors = {
   light: {
-    background: '#FEFAE0',
-    text: '#05204A',
-    primary: '#86BBD8',
-    secondary: '#02020A',
+    background: '#e2e8f0',
+    text: '#18181b',
+    primary: '#a4c6d0ff',
+    secondary: '#18181b',
   },
   dark: {
-    background: '#02020A',
-    text: '#FEFAE0',
-    primary: '#686963',
-    secondary: '#FEFAE0',
+    background: '#686963',
+    text: '#e2e8f0',
+    primary: '#3f3f46',
+    secondary: '#e2e8f0',
   },
   // system: {
   //   background: 'systemBackgroundColor',

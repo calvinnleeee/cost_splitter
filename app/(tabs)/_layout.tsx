@@ -6,14 +6,14 @@ import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 
-import ThemeContext from '@/context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { ColorTheme, Colors } from '@/assets/themes';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
 
   const colorScheme = useColorScheme();
-  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { theme, toggleTheme } = useTheme();
   const themeColors = theme === ColorTheme.system ? Colors[colorScheme ?? 'light'] : Colors[theme];
 
   return (
@@ -53,8 +53,9 @@ export default function TabLayout() {
           default: { backgroundColor: themeColors.primary },
         }),
         tabBarHideOnKeyboard: true,
-      }}>
-        <Tabs.Screen
+      }}
+    >
+      <Tabs.Screen
         name="home"
         options={{
           title: 'Home',

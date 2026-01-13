@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import StateContext from '@/context/StateContext';
-import ThemeContext from '@/context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Colors, ColorTheme } from '@/assets/themes';
 import { useColorScheme } from 'react-native';
 
@@ -10,7 +10,7 @@ const pageInit = () => {
 
   // Get theme variables
   const colorScheme = useColorScheme();
-  const { theme } = useContext(ThemeContext);
+  const { theme } = useTheme();
   const themeColors = theme === ColorTheme.system ? Colors[colorScheme ?? 'light'] : Colors[theme];
 
   return {state, themeColors, updatePeople, updateItems};
