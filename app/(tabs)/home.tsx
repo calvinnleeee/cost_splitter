@@ -1,7 +1,8 @@
-import { Image, StyleSheet, View, Text, Button, FlatList, useColorScheme, TouchableOpacity, Modal, Dimensions, TextInput, Alert, Share } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, Modal, Dimensions, TextInput, Alert, Share } from 'react-native';
 import pageInit from '@/assets/init';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Item, Person } from '@/assets/types';
+import { ThemedText } from '@/components/ThemedText';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
@@ -60,46 +61,65 @@ export default function HomeScreen() {
     }
   }
 
+  const ListItem = useCallback((item: Person) => {
+    const person = item;
+    let owed = 
+      state.items.reduce((acc, item) => item.payers.includes(person) ? acc + 
+        (item.getPrice() / item.payers.length) * (1 + tipPct / 100): acc, 0
+      );
+    return (
+      <View style={[styles.listItem, { borderBottomColor: themeColors.primary }]}>
+        <View style={{ flexDirection: 'row', marginBottom: 5 }}>
+          <ThemedText type='bold' style={[styles.text, { flex: 3 }]}>{item.name}</ThemedText>
+          <ThemedText type='bold' style={[styles.text, { flex: 1 }]}>${owed.toFixed(2)}</ThemedText>
+        </View>
+        <View style={{ marginBottom: 5 }}>
+          <ThemedText style={styles.subtext}>
+            {state.items.filter((item: Item) => item.payers.includes(person)).map((item: Item) => item.name).join(', ')}
+          </ThemedText>
+        </View>
+      </View>
+    )
+  }, [state]);
+
 
   return (
-    <View
-      style={[styles.main, {backgroundColor: themeColors.background}]}
-    >
-      <Text style={[styles.title, {color: themeColors.text}]}>Split with Friends :)</Text>
-    
+    <View style={[styles.main, { backgroundColor: themeColors.background }]}>
       {/* Display messages if items and people aren't filled out yet, otherwise show the totals */}
       {state.items.length === 0 ? (
-        <Text style={[styles.text, {color: themeColors.text, marginVertical: 20}]}>You need to add some items to the bill!</Text>
+        <ThemedText style={[styles.text, { marginVertical: 40 }]}>
+          You need to add some items to the bill!
+        </ThemedText>
       ) : (
         <>
           {/* Subtotals, taxes, and total */}
           <View style={{width: '100%'}}>
             {/* Display set tip, reset, and save buttons */}
-            <View style={[styles.topContainer, {marginBottom: 5}]}>
+            <View style={styles.topContainer}>
               <TouchableOpacity
-                style={[styles.button, {backgroundColor: themeColors.primary}]}
+                style={[styles.button1, { backgroundColor: themeColors.primary }]}
                 onPress={() => {
                   setModalPct(tipPct.toFixed(2));
                   setModalAmt(tipAmt.toFixed(2));
                   setModalVisible(true);
                 }}
               >
-                <Text style={{color: themeColors.text, alignSelf: 'center'}}>Set tip</Text>
+                <ThemedText style={styles.buttonText}>Set tip</ThemedText>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.button, {backgroundColor: themeColors.primary}]}
+                style={[styles.button1, {backgroundColor: themeColors.primary}]}
                 onPress={() => {onShare()}}
               >
-                <Text style={{color: themeColors.text, alignSelf: 'center'}}>Share</Text>
+                <ThemedText style={styles.buttonText}>Share</ThemedText>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.button, {backgroundColor: themeColors.primary}]}
+                style={[styles.button1, {backgroundColor: themeColors.primary}]}
                 onPress={() => {
                   Alert.alert(
                     'Are you sure?',
-                    'This will reset all items and people.',
+                    'This will clear all items and people.',
                     [
                       {
                         text: 'Cancel',
@@ -116,49 +136,34 @@ export default function HomeScreen() {
                   );
                 }}
               >
-                <Text style={{color: themeColors.text, alignSelf: 'center'}}>Reset all</Text>
+                <ThemedText style={styles.buttonText}>Reset</ThemedText>
               </TouchableOpacity>
             </View>
 
             {/* Display subtotal and tax amounts */}
             <View style={styles.subtotal}>
-              <Text style={[styles.sub, {color: themeColors.text}]}>
-                {`Subtotal\n$`}{subtotal.toFixed(2)}
-              </Text>
-              <Text style={[styles.sub, {color: themeColors.text}]}>
-                {`Tax\n$`}{tax.toFixed(2)}
-              </Text>
-              <Text style={[styles.sub, {color: themeColors.text}]}>
-                {`Tip\n$`}{tipAmt.toFixed(2)}
-              </Text>
-              <Text style={[styles.sub, {color: themeColors.text}]}>
-                {`Total\n$`}{total.toFixed(2)}
-              </Text>
+              <View style={styles.sub}>
+                <ThemedText style={styles.subText}>Subtotal</ThemedText>
+                <ThemedText type='bold' style={styles.subText}>${subtotal.toFixed(2)}</ThemedText>
+              </View>
+              <View style={styles.sub}>
+                <ThemedText style={styles.subText}>Tax</ThemedText>
+                <ThemedText type='bold' style={styles.subText}>${tax.toFixed(2)}</ThemedText>
+              </View>
+              <View style={styles.sub}>
+                <ThemedText style={styles.subText}>Tip</ThemedText>
+                <ThemedText type='bold' style={styles.subText}>${tipAmt.toFixed(2)}</ThemedText>
+              </View>
+              <View style={styles.sub}>
+                <ThemedText style={styles.subText}>Total</ThemedText>
+                <ThemedText type='bold' style={styles.subText}>${total.toFixed(2)}</ThemedText>
+              </View>
             </View>
           </View>
           <FlatList
             data={state.people}
             style={styles.list}
-            renderItem={({ item }) => {
-              const person = item;
-              let owed = 
-                state.items.reduce((acc, item) => item.payers.includes(person) ? acc + 
-                  (item.getPrice() / item.payers.length) * (1 + tipPct / 100): acc, 0
-                );
-              return (
-                <View style={[styles.listItem, {borderBottomColor: themeColors.primary}]}>
-                  <View style={{flexDirection: 'row', marginBottom: 5}}>
-                    <Text style={[styles.text, {flex: 3, color: themeColors.text}]}>{item.name}</Text>
-                    <Text style={[styles.text, {flex: 1, color: themeColors.text}]}>${owed.toFixed(2)}</Text>
-                  </View>
-                  <View style={{marginVertical: 5}}>
-                    <Text style={styles.subtext}>
-                      {state.items.filter((item: Item) => item.payers.includes(person)).map((item: Item) => item.name).join(", ")}
-                      </Text>
-                  </View>
-                </View>
-              )
-            }}
+            renderItem={({ item }) => ListItem(item)}
             ListEmptyComponent={() =>
               <Text style={[styles.text, {color: themeColors.text, alignSelf: 'center'}]}>You need some friends! :(</Text>
             }
@@ -174,6 +179,7 @@ export default function HomeScreen() {
         visible={modalVisible}
         onRequestClose={() => {setModalVisible(false)}}
       >
+        <View style={styles.modalBackground} />
         <TouchableOpacity
           style={{width: '100%', height: windowHeight}}
           onPressOut={() => {setModalVisible(false);}}
@@ -183,7 +189,7 @@ export default function HomeScreen() {
             activeOpacity={1}
           >
             {/* Edit item name */}
-            <Text style={[styles.modalLabel, {color: themeColors.text}]}>Tip Percentage</Text>
+            <ThemedText style={styles.modalLabel}>Tip Percentage</ThemedText>
             <TextInput
               style={[styles.modalInput, {color: themeColors.text}]}
               placeholder="Percentage (%)"
@@ -195,11 +201,10 @@ export default function HomeScreen() {
               selectTextOnFocus={true}
               defaultValue={modalPct.toString()}
               inputMode='numeric'
-              maxLength={6} // 6 = '100.00'
             />
 
             {/* Edit item's price */}
-            <Text style={[styles.text, {color: themeColors.text}]}>Tip Amount ($)</Text>
+            <ThemedText style={styles.modalLabel}>Tip Amount ($)</ThemedText>
             <TextInput
               style={[styles.modalInput, {color: themeColors.text}]}
               placeholder="Amount ($)"
@@ -216,20 +221,20 @@ export default function HomeScreen() {
             {/* Accept and cancel/exit buttons */}
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.button, {backgroundColor: themeColors.primary}]}
+                style={[styles.button2, { backgroundColor: themeColors.primary }]}
                 onPress={() => {
                   setTipPct(parseFloat(modalPct));
                   setTipAmt(parseFloat(modalAmt));
                   setModalVisible(false);
                 }}
               >
-                <Text style={{color: themeColors.text, alignSelf: 'center'}}>Confirm</Text>
+                <ThemedText style={{ alignSelf: 'center' }}>Confirm</ThemedText>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.button, {backgroundColor: themeColors.primary}]}
+                style={[styles.button2, { backgroundColor: themeColors.primary }]}
                 onPress={() => {setModalVisible(false);}}
               >
-                <Text style={{color: themeColors.text, alignSelf: 'center'}}>Cancel</Text>
+                <ThemedText style={{ alignSelf: 'center' }}>Cancel</ThemedText>
               </TouchableOpacity>
 
             </View>
@@ -250,38 +255,51 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   text: {
-    fontSize: 18,
+    fontSize: 16,
   },
   subtext: {
     fontSize: 14,
-    color: 'gray',
   },
   title: {
     fontSize: 24,
     marginVertical: 10
   },
-  button: {
+  button1: {
     borderRadius: 10,
-    width: 80,
+    width: '28%',
     padding: 10,
     justifyContent: 'center',
   },
+  button2: {
+    borderRadius: 10,
+    width: '35%',
+    padding: 10,
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
   topContainer: {
-    width: '80%',
+    marginVertical: '3%',
+    width: '85%',
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignSelf: 'center',
   },
   subtotal: {
-    fontSize: 16,
     marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignSelf: 'center',
-    width: '80%',
+    width: '85%',
   },
   sub: {
+    flexDirection: 'column',
     flex: 1,
+    fontSize: 15,
+  },
+  subText: {
     textAlign: 'center',
   },
   list: {
@@ -296,19 +314,27 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderBottomWidth: 1,
   },
+  modalBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '120%',
+    height: '120%',
+    opacity: 0.65,
+    backgroundColor: '#0a0a0a'
+  },
   modal: {
     width: '80%',
-    height: '40%',
+    // height: '40%',
     alignSelf: 'center',
     marginTop: '40%',
     padding: 15,
     borderRadius: 10,
-    borderWidth: 2,
+    borderWidth: 1.5,
     gap: 5,
   },
   modalLabel: {
-    fontSize: 18,
-    marginBottom: 5,
+    fontSize: 16,
   },
   modalInput: {
     width: '90%',
@@ -317,11 +343,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderBottomColor: 'gray',
     borderBottomWidth: 1,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   modalButtons: {
+    marginVertical: 10,
     alignSelf: 'center',
-    width: '80%',
+    width: '90%',
     flexDirection: 'row',
     justifyContent: 'space-evenly'
   },
