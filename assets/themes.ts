@@ -12,7 +12,6 @@ black             - #02020A
 oxford blue       - #05204A
 */
 
-
 export const Colors = {
   light: {
     background: '#e2e8f0',
@@ -26,10 +25,4 @@ export const Colors = {
     primary: '#3f3f46',
     secondary: '#e2e8f0',
   },
-  // system: {
-  //   background: 'systemBackgroundColor',
-  //   text: 'labelColor',
-  //   primary: 'systemBlueColor',
-  //   secondary: 'systemGreenColor',
-  // },
 }
