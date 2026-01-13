@@ -24,6 +24,7 @@ export default function TabLayout() {
         headerStyle: { backgroundColor: themeColors.primary },
         headerTintColor: themeColors.text,
         headerTitle: 'Split with Friends',
+        headerTitleStyle: { fontFamily: 'MontserratBold', fontSize: 18 },
         headerTitleAlign: 'center',
         headerRight: () => 
           <TouchableOpacity
