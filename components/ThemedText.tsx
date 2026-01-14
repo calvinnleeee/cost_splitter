@@ -18,6 +18,7 @@ export function ThemedText({
         {
           color: themeColors.text,
           fontFamily: ['default', 'subtitle', 'link'].includes(type) ? 'Montserrat' : 'MontserratBold',
+          letterSpacing: -0.3,
         },
         type === 'default' ? styles.default : undefined,
         type === 'title' ? styles.title : undefined,
