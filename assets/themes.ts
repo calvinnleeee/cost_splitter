@@ -18,11 +18,13 @@ export const Colors = {
     text: '#18181b',
     primary: '#a4c6d0ff',
     secondary: '#18181b',
+    placeholderText: '#808080'
   },
   dark: {
     background: '#686963',
     text: '#e2e8f0',
     primary: '#3f3f46',
     secondary: '#e2e8f0',
+    placeholderText: '#D3D3D3'
   },
 }
