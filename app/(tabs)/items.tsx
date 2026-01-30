@@ -1,10 +1,10 @@
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Modal, Dimensions, Alert } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Dimensions, Alert, Animated } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useRef, useState } from 'react';
 import { Item } from '@/assets/types';
 import pageInit from '@/assets/init';
 import { ThemedText } from '@/components/ThemedText';
+import ModalWrapper from '@/components/ModalWrapper';
 
 export default function ItemsScreen() {
   const { state, themeColors, updateItems, updatePeople } = pageInit();
@@ -18,6 +18,22 @@ export default function ItemsScreen() {
   const [modalPST7, setModalPST7] = useState<boolean>(false);
   const [modalPST10, setModalPST10] = useState<boolean>(false);
 
+  const modalOpacity = useRef(new Animated.Value(0));
+  const fadeIn = () => {
+    Animated.timing(modalOpacity.current, {
+      toValue: 0.65,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+  const fadeOut = () => {
+    Animated.timing(modalOpacity.current, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
   // Set modal variables when user clicks add item button
   const openModal = (item: Item) => {
     setItemToEdit(item);
@@ -27,6 +43,7 @@ export default function ItemsScreen() {
     setModalPST7(item.pst7);
     setModalPST10(item.pst10);
     setModalVisible(true);
+    fadeIn();
   };
 
   // Clear modal variables when modal is closed
@@ -37,6 +54,7 @@ export default function ItemsScreen() {
     setModalPST7(false);
     setModalPST10(false);
     setModalVisible(false);
+    fadeOut();
   };
 
   // Add the item to the list or update the existing item
@@ -99,8 +117,7 @@ export default function ItemsScreen() {
           style={[styles.button, { backgroundColor: themeColors.primary }]}
           onPress={() => {
             const newItem = new Item(`New item`);
-            setItemToEdit(newItem);
-            setModalVisible(true);
+            openModal(newItem);
           }}
         >
           <ThemedText style={{ textAlign: 'center' }}>Add item</ThemedText>
@@ -130,7 +147,7 @@ export default function ItemsScreen() {
 
       {/* Display message or list depending on list length */}
       {state.items.length == 0 ? (
-        <ThemedText style={[styles.text, { marginTop: 25 }]}>No items added</ThemedText>
+        <ThemedText style={{ marginTop: 25, fontSize: 20 }}>No items added</ThemedText>
       ) : (
         <FlatList
           data={state.items}
@@ -139,108 +156,97 @@ export default function ItemsScreen() {
           keyExtractor={(item) => state.items.indexOf(item).toString()}
         />
       )}
-      
+
+      <Animated.View style={[styles.modalBackground, { height: windowHeight * 1.5, opacity: modalOpacity.current }]} pointerEvents={'none'} />
+
       {/* Modal for adding an item */}
-      <Modal
-        animationType='fade'
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {closeModal()}}
+      <ModalWrapper
+        isVisible={modalVisible}
+        closeModal={() => {closeModal()}}
       >
-        <View style={styles.modalBackground} />
-        <TouchableOpacity
-          style={{width: '100%', height: windowHeight}}
-          onPressOut={() => closeModal()}
-        >
+        {/* Edit item name */}
+        <ThemedText style={styles.modalLabel}>Item name</ThemedText>
+        <TextInput
+          style={[styles.modalInput, {color: themeColors.text}]}
+          placeholder="Enter the item's name"
+          placeholderTextColor={themeColors.placeholderText}
+          onChangeText={setNewName}
+          selectTextOnFocus={true}
+          value={newName}
+        />
+
+        {/* Edit item's price */}
+        <ThemedText style={styles.modalLabel}>Price</ThemedText>
+        <TextInput
+          style={[styles.modalInput, {color: themeColors.text}]}
+          placeholder="Enter the item's price"
+          placeholderTextColor={themeColors.placeholderText}
+          onChangeText={setNewPrice}
+          selectTextOnFocus={true}
+          value={newPrice}
+          inputMode='numeric'
+        />
+
+        {/* Checkboxes for item's GST/PST */}
+        {itemToEdit &&
+        <View style={styles.modalCheckboxView}>
+          <View style={styles.checkboxContainer}>
+            <ThemedText type='bold' style={{ fontSize: 16 }}>GST</ThemedText>
+            <ThemedText style={{ fontSize: 16 }}>{`(5%)`}</ThemedText>
+            <Checkbox
+              style={styles.modalCheckbox}
+              value={modalGST}
+              onValueChange={setModalGST}
+            />
+          </View>
+          <View style={styles.checkboxContainer}>
+            <ThemedText type='bold' style={{ fontSize: 16 }}>PST</ThemedText>
+            <ThemedText style={{ fontSize: 16 }}>{`(7%)`}</ThemedText>
+            <Checkbox
+              style={styles.modalCheckbox}
+              value={modalPST7}
+              onValueChange={setModalPST7}
+            />
+          </View>
+          <View style={styles.checkboxContainer}>
+            <ThemedText type='bold' style={{ fontSize: 16 }}>PST</ThemedText>
+            <ThemedText style={{ fontSize: 16 }}>{`(10%)`}</ThemedText>
+            <Checkbox
+              style={styles.modalCheckbox}
+              value={modalPST10}
+              onValueChange={setModalPST10}
+            />
+          </View>
+        </View>}
+
+        {/* Accept and cancel/exit buttons */}
+        <View style={styles.modalButtons}>
           <TouchableOpacity
-            style={[styles.modal, { borderColor: themeColors.text, backgroundColor: themeColors.background}]}
-            activeOpacity={1}
+            style={[styles.button, {backgroundColor: themeColors.primary}]}
+            onPress={() => {
+              // Check the inputs, then update the item
+              if (newName.trim().length == 0) {
+                Alert.alert('Name must contain at least one non-whitespace character.');
+                return;
+              }
+              if (isNaN(parseFloat(newPrice)) || parseFloat(newPrice) < 0) {
+                Alert.alert('Price must be a positive number.');
+                return;
+              }
+              updateItem();
+            }}
           >
-            {/* Edit item name */}
-            <ThemedText style={styles.modalLabel}>Item name</ThemedText>
-            <TextInput
-              style={[styles.modalInput, {color: themeColors.text}]}
-              placeholder="Enter the item's name"
-              placeholderTextColor={themeColors.placeholderText}
-              onChangeText={setNewName}
-              selectTextOnFocus={true}
-              value={newName}
-            />
-
-            {/* Edit item's price */}
-            <ThemedText style={styles.modalLabel}>Price</ThemedText>
-            <TextInput
-              style={[styles.modalInput, {color: themeColors.text}]}
-              placeholder="Enter the item's price"
-              placeholderTextColor={themeColors.placeholderText}
-              onChangeText={setNewPrice}
-              selectTextOnFocus={true}
-              value={newPrice}
-              inputMode='numeric'
-            />
-
-            {/* Checkboxes for item's GST/PST */}
-            {itemToEdit &&
-            <View style={styles.modalCheckboxView}>
-              <View style={styles.checkboxContainer}>
-                <ThemedText type='bold' style={{ fontSize: 16 }}>GST</ThemedText>
-                <ThemedText style={{ fontSize: 16 }}>{`(5%)`}</ThemedText>
-                <Checkbox
-                  style={styles.modalCheckbox}
-                  value={modalGST}
-                  onValueChange={setModalGST}
-                />
-              </View>
-              <View style={styles.checkboxContainer}>
-                <ThemedText type='bold' style={{ fontSize: 16 }}>PST</ThemedText>
-                <ThemedText style={{ fontSize: 16 }}>{`(7%)`}</ThemedText>
-                <Checkbox
-                  style={styles.modalCheckbox}
-                  value={modalPST7}
-                  onValueChange={setModalPST7}
-                />
-              </View>
-              <View style={styles.checkboxContainer}>
-                <ThemedText type='bold' style={{ fontSize: 16 }}>PST</ThemedText>
-                <ThemedText style={{ fontSize: 16 }}>{`(10%)`}</ThemedText>
-                <Checkbox
-                  style={styles.modalCheckbox}
-                  value={modalPST10}
-                  onValueChange={setModalPST10}
-                />
-              </View>
-            </View>}
-
-            {/* Accept and cancel/exit buttons */}
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, {backgroundColor: themeColors.primary}]}
-                onPress={() => {
-                  // Check the inputs, then update the item
-                  if (newName.trim().length == 0) {
-                    Alert.alert('Name must contain at least one non-whitespace character.');
-                    return;
-                  }
-                  if (isNaN(parseFloat(newPrice)) || parseFloat(newPrice) < 0) {
-                    Alert.alert('Price must be a positive number.');
-                    return;
-                  }
-                  updateItem();
-                }}
-              >
-                <ThemedText style={{ textAlign: 'center' }}>Confirm</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, {backgroundColor: themeColors.primary}]}
-                onPress={() => closeModal()}
-              >
-                <ThemedText style={{ textAlign: 'center' }}>Cancel</ThemedText>
-              </TouchableOpacity>
-
-            </View>
+            <ThemedText style={{ textAlign: 'center' }}>Confirm</ThemedText>
           </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+          <TouchableOpacity
+            style={[styles.button, {backgroundColor: themeColors.primary}]}
+            onPress={() => closeModal()}
+          >
+            <ThemedText style={{ textAlign: 'center' }}>Cancel</ThemedText>
+          </TouchableOpacity>
+
+        </View>
+      </ModalWrapper>
 
     </View>
   );
@@ -257,9 +263,6 @@ const styles = StyleSheet.create({
   },
   title: {
     marginVertical: 10
-  },
-  text: {
-    fontSize: 20,
   },
   button: {
     borderRadius: 10,
@@ -300,30 +303,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'gray',
   },
-
   delete: {
     flex: 1,
     width: 50,
     height: 50,
   },
-  modal: {
-    width: '80%',
-    height: '70%',
-    alignSelf: 'center',
-    marginTop: '15%',
-    padding: 15,
-    borderRadius: 10,
-    borderWidth: 2,
-    gap: 5,
-  },
   modalBackground: {
     position: 'absolute',
-    top: 0,
+    top: -50,
     left: 0,
     width: '120%',
-    height: '120%',
-    opacity: 0.65,
-    backgroundColor: '#0a0a0a'
+    height: '140%',
+    backgroundColor: '#0a0a0a',
+    zIndex: 3,
   },
   modalLabel: {
     fontSize: 20,
