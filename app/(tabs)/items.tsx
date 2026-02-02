@@ -1,13 +1,15 @@
 import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Dimensions, Alert, Animated } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useContext, useRef, useState } from 'react';
 import { Item } from '@/assets/types';
 import pageInit from '@/assets/init';
+import StateContext from '@/context/StateContext';
 import { ThemedText } from '@/components/ThemedText';
 import ModalWrapper from '@/components/ModalWrapper';
 
 export default function ItemsScreen() {
-  const { state, themeColors, updateItems, updatePeople } = pageInit();
+  const { themeColors } = pageInit();
+  const { items, updateItems } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -65,32 +67,32 @@ export default function ItemsScreen() {
       itemToEdit.gst = modalGST;
       itemToEdit.pst7 = modalPST7;
       itemToEdit.pst10 = modalPST10;
-      if (!state.items.includes(itemToEdit)) {
-        updateItems([...state.items, itemToEdit]);
-      } else {
-        updateItems([...state.items]);
+      if (!items.some(i => Object.is(i, itemToEdit))) {
+        updateItems([...items, itemToEdit]);
       }
       closeModal();
     }
   };
 
   // Remove the item from the list
-  const removeItem = (item: Item) => {
-    updateItems(state.items.filter((i) => i !== item));
-  }
+  const removeItem = useCallback((item: Item) => {
+    const arr = items.filter(i => !Object.is(i, item));
+    updateItems(arr);
+  }, [items]);
 
-  const ItemDisplay = useCallback((item: Item) => (
-    <View style={[styles.listItem, {borderColor: themeColors.primary}]}>
+  // Display component for each item in the list
+  const ItemDisplay = ({ item }: { item: Item }) => (
+    <View style={[styles.listItem, { borderColor: themeColors.primary }]}>
       {/* Item name and price */}
       <TouchableOpacity
-        style={{flex: 7, flexDirection: 'column'}}
-        onPress={() => {openModal(item)}}
+        style={{ flex: 7, flexDirection: 'column' }}
+        onPress={() => openModal(item)}
       >
-        <Text style={[styles.input, {color: themeColors.text}]}>{item.name}</Text>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.subinput}>{`$${item.price.toFixed(2)}`}</Text>
-          {item.gst && <Text style={styles.subinput}>{` + ${(item.getGST()).toFixed(2)} (GST)`}</Text>}
-          {(item.pst7 || item.pst10) && <Text style={styles.subinput}>{` + ${(item.getPST()).toFixed(2)} (PST)`}</Text>}
+        <ThemedText style={styles.input}>{item.name}</ThemedText>
+        <View style={{ flexDirection: 'row' }}>
+          <ThemedText style={styles.subinput}>{`$${item.price.toFixed(2)}`}</ThemedText>
+          {item.gst && <ThemedText style={styles.subinput}>{` + ${(item.getGST()).toFixed(2)} (GST)`}</ThemedText>}
+          {(item.pst7 || item.pst10) && <ThemedText style={styles.subinput}>{` + ${(item.getPST()).toFixed(2)} (PST)`}</ThemedText>}
         </View>
       </TouchableOpacity>
 
@@ -100,10 +102,10 @@ export default function ItemsScreen() {
           removeItem(item);
         }}
       >
-        <Text style={{color: 'red', paddingTop: 15, textAlign: 'center'}}>X</Text>
+        <ThemedText type='bold' style={{ color: 'red', paddingTop: 15, textAlign: 'center' }}>X</ThemedText>
       </TouchableOpacity>
     </View>
-  ), [])
+  )
 
 
   return (
@@ -125,7 +127,7 @@ export default function ItemsScreen() {
 
         {/* Reset button */}
         <TouchableOpacity
-          style={[styles.button, {backgroundColor: themeColors.primary}]}
+          style={[styles.button, { backgroundColor: themeColors.primary }]}
           onPress={() => {updateItems([])}}
         >
           <ThemedText style={{ textAlign: 'center' }}>Reset items</ThemedText>
@@ -133,27 +135,27 @@ export default function ItemsScreen() {
       </View>
 
       {/* Display subtotal and tax amounts */}
-      {state.items.length > 0 && <View style={styles.subtotal}>
-        <Text style={[styles.sub, {color: themeColors.text}]}>
-          {`Subtotal\n$`}{state.items.reduce((acc, item) => acc + item.price, 0).toFixed(2)}
+      {items.length > 0 && <View style={styles.subtotal}>
+        <Text style={[styles.sub, { color: themeColors.text }]}>
+          {`Subtotal\n$`}{items.reduce((acc, item) => acc + item.price, 0).toFixed(2)}
         </Text>
-        <Text style={[styles.sub, {color: themeColors.text}]}>
-          {`GST\n$`}{(state.items.reduce((acc, item) => acc + (item.gst ? item.price * 0.05 : 0), 0)).toFixed(2)}
+        <Text style={[styles.sub, { color: themeColors.text }]}>
+          {`GST\n$`}{(items.reduce((acc, item) => acc + (item.gst ? item.price * 0.05 : 0), 0)).toFixed(2)}
         </Text>
-        <Text style={[styles.sub, {color: themeColors.text}]}>
-          {`PST\n$`}{(state.items.reduce((acc, item) => acc + (item.pst7 ? item.price * 0.07 : 0) + (item.pst10 ? item.price * 0.10 : 0), 0)).toFixed(2)}
+        <Text style={[styles.sub, { color: themeColors.text }]}>
+          {`PST\n$`}{(items.reduce((acc, item) => acc + (item.pst7 ? item.price * 0.07 : 0) + (item.pst10 ? item.price * 0.10 : 0), 0)).toFixed(2)}
         </Text>
       </View>}
 
       {/* Display message or list depending on list length */}
-      {state.items.length == 0 ? (
+      {items.length == 0 ? (
         <ThemedText style={{ marginTop: 25, fontSize: 20 }}>No items added</ThemedText>
       ) : (
         <FlatList
-          data={state.items}
+          data={items}
           style={styles.list}
-          renderItem={({ item }) => ItemDisplay(item)}
-          keyExtractor={(item) => state.items.indexOf(item).toString()}
+          renderItem={({ item }) => <ItemDisplay item={item} />}
+          keyExtractor={(item) => items.indexOf(item).toString()}
         />
       )}
 
@@ -162,12 +164,12 @@ export default function ItemsScreen() {
       {/* Modal for adding an item */}
       <ModalWrapper
         isVisible={modalVisible}
-        closeModal={() => {closeModal()}}
+        closeModal={() => closeModal()}
       >
         {/* Edit item name */}
         <ThemedText style={styles.modalLabel}>Item name</ThemedText>
         <TextInput
-          style={[styles.modalInput, {color: themeColors.text}]}
+          style={[styles.modalInput, { color: themeColors.text }]}
           placeholder="Enter the item's name"
           placeholderTextColor={themeColors.placeholderText}
           onChangeText={setNewName}
@@ -178,7 +180,7 @@ export default function ItemsScreen() {
         {/* Edit item's price */}
         <ThemedText style={styles.modalLabel}>Price</ThemedText>
         <TextInput
-          style={[styles.modalInput, {color: themeColors.text}]}
+          style={[styles.modalInput, { color: themeColors.text }]}
           placeholder="Enter the item's price"
           placeholderTextColor={themeColors.placeholderText}
           onChangeText={setNewPrice}
@@ -222,7 +224,7 @@ export default function ItemsScreen() {
         {/* Accept and cancel/exit buttons */}
         <View style={styles.modalButtons}>
           <TouchableOpacity
-            style={[styles.button, {backgroundColor: themeColors.primary}]}
+            style={[styles.button, { backgroundColor: themeColors.primary }]}
             onPress={() => {
               // Check the inputs, then update the item
               if (newName.trim().length == 0) {
@@ -239,7 +241,7 @@ export default function ItemsScreen() {
             <ThemedText style={{ textAlign: 'center' }}>Confirm</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.button, {backgroundColor: themeColors.primary}]}
+            style={[styles.button, { backgroundColor: themeColors.primary }]}
             onPress={() => closeModal()}
           >
             <ThemedText style={{ textAlign: 'center' }}>Cancel</ThemedText>
@@ -284,13 +286,13 @@ const styles = StyleSheet.create({
   list: {
     marginVertical: 20,
     paddingHorizontal: 20,
-    width: '80%',
+    width: '85%',
     flex: 1,
     borderRadius: 5,
   },
   listItem: {
     flexDirection: 'row',
-    height: 60,
+    height: 65,
     paddingVertical: 5,
     borderBottomWidth: 1,
   },
@@ -310,10 +312,10 @@ const styles = StyleSheet.create({
   },
   modalBackground: {
     position: 'absolute',
-    top: -50,
+    top: '-25%',
     left: 0,
     width: '120%',
-    height: '140%',
+    height: '150%',
     backgroundColor: '#0a0a0a',
     zIndex: 3,
   },
