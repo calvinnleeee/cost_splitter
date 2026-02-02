@@ -1,12 +1,13 @@
-import { StyleSheet, View, Text, FlatList, Modal, Dimensions, Alert } from 'react-native';
+import { StyleSheet, View, FlatList, Dimensions, Alert, Animated } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native';
-import { useEffect, useRef, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useRef, useState } from 'react';
 
 import { Person, Item } from '@/assets/types';
 import pageInit from '@/assets/init';
 import DropdownSelect from 'react-native-input-select';
 import { DropdownSelectHandle } from 'react-native-input-select/lib/typescript/src/types/index.types';
+import { ThemedText } from '@/components/ThemedText';
+import ModalWrapper from '@/components/ModalWrapper';
 
 export default function PeopleScreen() {
   const {state, themeColors, updatePeople, updateItems} = pageInit();
@@ -18,6 +19,22 @@ export default function PeopleScreen() {
   const [itemIdx, setItemIdx] = useState<number[]>([]);
   const dropdownRef = useRef<DropdownSelectHandle | null>(null);
 
+  const modalOpacity = useRef(new Animated.Value(0));
+  const fadeIn = () => {
+    Animated.timing(modalOpacity.current, {
+      toValue: 0.65,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+  const fadeOut = () => {
+    Animated.timing(modalOpacity.current, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
   // Open the modal after setting the person to edit
   const openModal = (person: Person) => {
     setPersonToEdit(person);
@@ -25,6 +42,7 @@ export default function PeopleScreen() {
     const idxs = state.items.filter((item: Item) => item.payers.includes(person));
     setItemIdx(idxs.map((item: Item) => state.items.indexOf(item)));
     setModalVisible(true);
+    fadeIn();
   };
 
   // Close the modal and reset display values
@@ -32,6 +50,7 @@ export default function PeopleScreen() {
     setName('');
     setItemIdx([]);
     setModalVisible(false);
+    fadeOut();
   };
 
   // Update the person currently being edited and add them to the list of people if they aren't in there yet
@@ -66,161 +85,133 @@ export default function PeopleScreen() {
     updateItems(newItems);
   };
 
-  const theme = StyleSheet.create({
-    text: {
-      color: themeColors.text,
-    },
-    bg: {
-      backgroundColor: themeColors.background,
-    },
-    border: {
-      borderColor: themeColors.primary,
-    },
-    button: {
-      backgroundColor: themeColors.primary,
-    }
-  });
+  // FlatList component to render each person in the list
+  const PersonDisplay = useCallback(({ person }: { person: Person }) => {
+    return (
+      <View style={[styles.listItem, { borderColor: themeColors.primary }]}>
+        <TouchableOpacity
+          style={{ flex: 7, flexDirection: 'column' }}
+          onPress={() => {openModal(person)}}
+        >
+          <ThemedText style={styles.name}>{person.name}</ThemedText>
+        </TouchableOpacity>
 
+        <TouchableOpacity
+          style={styles.delete}
+          onPress={() => {removePerson(person)}}
+        >
+          <ThemedText style={{ color: 'red', paddingTop: 15, textAlign: 'center' }}>X</ThemedText>
+        </TouchableOpacity>
+      </View>
+    );
+  }, []);
 
   return (
-    <View style={[styles.main, theme.bg]}>
+    <View style={[styles.main, {  backgroundColor: themeColors.background}]}>
 
       {/* Title */}
-      <Text style={[styles.title, theme.text, {marginBottom: 20}]}>Add/Remove Friends</Text>
+      <ThemedText type='title' style={styles.title}>Add/Remove Friends</ThemedText>
 
-      <View style={{flexDirection: 'row', width: '80%', justifyContent: 'space-evenly'}}>
+      <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-evenly' }}>
       {/* Add friend button */}
         <TouchableOpacity
-          style={[styles.button, theme.button]}
+          style={[styles.button, { backgroundColor: themeColors.primary }]}
           onPress={() => {
             const friend = new Person('Friend');
             setPersonToEdit(friend);
             openModal(friend);
           }}
         >
-          <Text style={[theme.text, {alignSelf: 'center'}]}>Add friend</Text>
+          <ThemedText style={{ alignSelf: 'center' }}>Add friend</ThemedText>
         </TouchableOpacity>
 
         {/* Reset button */}
         <TouchableOpacity
-          style={[styles.button, theme.button]}
+          style={[styles.button, { backgroundColor: themeColors.primary }]}
           onPress={() => {updatePeople([])}}
         >
-          <Text style={[theme.text, {alignSelf: 'center'}]}>Reset friends :(</Text>
+          <ThemedText style={{ alignSelf: 'center' }}>Reset</ThemedText>
         </TouchableOpacity>
       </View>
 
       {/* Display message or list depending on list length */}
       {state.people.length == 0 ? (
-        <Text style={[styles.text, theme.text, {marginTop: 20}]}>No friends yet :'(</Text>
+        <ThemedText style={{ marginTop: 25, fontSize: 20 }}>No friends yet :'(</ThemedText>
       ) : (
         <FlatList
           data={state.people}
           style={styles.list}
           renderItem={({ item }) => (
-            <View style={[styles.listItem, theme.border]}>
-              <TouchableOpacity
-                style={{flex: 7, flexDirection: 'column'}}
-                onPress={() => {openModal(item)}}
-              >
-                <Text style={[styles.name, theme.text]}>{item.name}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.delete}
-                onPress={() => {removePerson(item)}}
-              >
-                <Text style={{color: 'red', paddingTop: 15, textAlign: 'center'}}>X</Text>
-              </TouchableOpacity>
-            </View>
+            <PersonDisplay person={item} />
           )}
           keyExtractor={(item) => state.people.indexOf(item).toString()}
         />
       )}
 
+      <Animated.View style={[styles.modalBackground, { height: windowHeight * 1.5, opacity: modalOpacity.current }]} pointerEvents={'none'} />
+
       {/* Modal for adding a friend */}
-      <Modal
-        animationType='fade'
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => closeModal()}
+      <ModalWrapper
+        isVisible={modalVisible}
+        closeModal={() => closeModal()}
       >
-        <TouchableOpacity
-          style={{width: '100%', height: windowHeight}}
-          onPressOut={() => closeModal()}
-        >
+        {/* Edit person name */}
+        <ThemedText style={styles.modalLabel}>Friend's name</ThemedText>
+        <TextInput
+          style={[styles.modalInput, {color: themeColors.text}]}
+          placeholder="Enter your friend's name"
+          placeholderTextColor={'gray'}
+          onChangeText={setName}
+          selectTextOnFocus={true}
+          defaultValue={name.trim().length != 0 ? name : ''}
+        />
+
+        {/* Dropdown for all items */}
+        <ThemedText style={styles.modalLabel}>Select item(s)</ThemedText>
+        <DropdownSelect
+          // label="Items"
+          placeholder="Select item(s)"
+          isMultiple={true}
+          isSearchable={false}
+          options={state.items.map((item: Item, idx: number) => ({label: item.name, value: idx}))}
+          selectedValue={itemIdx}
+          onValueChange={(i: any) => {
+            setItemIdx(i);
+          }}
+          modalControls={{
+            modalOptionsContainerStyle: {
+              height: '50%',
+            },
+            modalProps: {
+              onRequestClose: () => {dropdownRef.current?.close()},
+            }
+          }}
+          ref={(ref) => {dropdownRef.current = ref}}
+        />
+
+        {/* Accept and cancel/exit buttons */}
+        <View style={styles.modalButtons}>
           <TouchableOpacity
-            style={[styles.modal, { borderColor: themeColors.text, backgroundColor: themeColors.background}]}
-            activeOpacity={1}
+            style={[styles.button, { backgroundColor: themeColors.primary }]}
+            onPress={() => {
+              if (name.trim().length == 0) {
+                Alert.alert('Name must contain at least one non-whitespace character.');
+                return;
+              }
+              updatePerson();
+            }}
           >
-            {/* Edit person name */}
-            <Text style={[styles.modalLabel, theme.text]}>Friend's name</Text>
-            <TextInput
-              style={[styles.modalInput, {color: themeColors.text}]}
-              placeholder="Enter your friend's name"
-              placeholderTextColor={'gray'}
-              onChangeText={setName}
-              selectTextOnFocus={true}
-              defaultValue={name.trim().length != 0 ? name : ''}
-            />
-
-            {/* Dropdown for all items */}
-            <Text style={[styles.modalLabel, theme.text]}>Select item(s)</Text>
-            <DropdownSelect
-              // label="Items"
-              placeholder="Select item(s)"
-              isMultiple={true}
-              isSearchable={false}
-              options={state.items.map((item: Item, idx: number) => ({label: item.name, value: idx}))}
-              selectedValue={itemIdx}
-              onValueChange={(i: any) => {
-                setItemIdx(i);
-              }}
-              modalControls={{
-                modalOptionsContainerStyle: {
-                  height: '40%',
-                },
-                modalProps: {
-                  onRequestClose: () => {dropdownRef.current?.close()},
-                }
-              }}
-              ref={(ref) => {dropdownRef.current = ref}}
-            />
-
-            {/* Accept and cancel/exit buttons */}
-            <View style={styles.modalButtons}>
-              {/* Save friend once OAuth is done */}
-              {/* <TouchableOpacity
-                style={[styles.button, theme.button]}
-                onPress={() => {
-                  
-                }}
-              >
-                <Text style={[theme.text, {alignSelf: 'center'}]}>Save friend</Text>
-              </TouchableOpacity> */}
-              <TouchableOpacity
-                style={[styles.button, theme.button]}
-                onPress={() => {
-                  if (name.trim().length == 0) {
-                    Alert.alert('Name must contain at least one non-whitespace character.');
-                    return;
-                  }
-                  updatePerson();
-                }}
-              >
-                <Text style={[theme.text, {alignSelf: 'center'}]}>Confirm</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, theme.button]}
-                onPress={() => closeModal()}
-              >
-                <Text style={[theme.text, {alignSelf: 'center'}]}>Cancel</Text>
-              </TouchableOpacity>
-
-            </View>
+            <ThemedText style={{ alignSelf: 'center' }}>Confirm</ThemedText>
           </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: themeColors.primary }]}
+            onPress={() => closeModal()}
+          >
+            <ThemedText style={{ alignSelf: 'center' }}>Cancel</ThemedText>
+          </TouchableOpacity>
+
+        </View>
+      </ModalWrapper>
       
     </View>
   );
@@ -235,15 +226,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   title: {
-    fontSize: 24,
-    marginVertical: 10
-  },
-  text: {
-    fontSize: 20,
+    marginVertical: 10,
   },
   button: {
     borderRadius: 10,
-    width: 100,
+    width: 110,
     padding: 10,
     justifyContent: 'center',
   },
@@ -271,15 +258,14 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
-  modal: {
-    width: '80%',
-    height: '70%',
-    alignSelf: 'center',
-    marginTop: '15%',
-    padding: 15,
-    borderRadius: 10,
-    borderWidth: 2,
-    gap: 5,
+  modalBackground: {
+    position: 'absolute',
+    top: '-25%',
+    left: 0,
+    width: '120%',
+    height: '150%',
+    backgroundColor: '#0a0a0a',
+    zIndex: 3,
   },
   modalButtons: {
     alignSelf: 'center',
