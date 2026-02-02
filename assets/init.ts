@@ -13,7 +13,7 @@ const pageInit = () => {
   const { theme } = useTheme();
   const themeColors = theme === ColorTheme.system ? Colors[colorScheme ?? 'light'] : Colors[theme];
 
-  return {state, themeColors, updatePeople, updateItems};
+  return { state, themeColors, updatePeople, updateItems };
 }
 
 export default pageInit;
