@@ -24,7 +24,6 @@ export const StateProvider = ({children}: PropsWithChildren) => {
   const [state, setState] = useState<State>({people: peopleList, items: itemsList});
 
   useEffect(() => {
-    console.log('new people: ', peopleList.map(p => p.name), '\nnew items: ', itemsList.map(i => i.name));
     setState({
       people: peopleList,
       items: itemsList,
