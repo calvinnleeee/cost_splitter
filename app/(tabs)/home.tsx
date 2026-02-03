@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   listItem: {
     flexDirection: 'column',
-    marginVertical: 10,
+    paddingVertical: 5,
     borderBottomWidth: 1,
   },
   modalBackground: {

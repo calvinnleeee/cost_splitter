@@ -88,7 +88,7 @@ export default function ItemsScreen() {
         style={{ flex: 7, flexDirection: 'column' }}
         onPress={() => openModal(item)}
       >
-        <ThemedText style={styles.input}>{item.name}</ThemedText>
+        <ThemedText style={styles.itemName}>{item.name}</ThemedText>
         <View style={{ flexDirection: 'row' }}>
           <ThemedText style={styles.subinput}>{`$${item.price.toFixed(2)}`}</ThemedText>
           {item.gst && <ThemedText style={styles.subinput}>{` + ${(item.getGST()).toFixed(2)} (GST)`}</ThemedText>}
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderBottomWidth: 1,
   },
-  input: {
+  itemName: {
     flex: 7,
     fontSize: 18,
     height: 50,

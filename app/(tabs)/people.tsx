@@ -68,6 +68,7 @@ export default function PeopleScreen() {
           item.payers = item.payers.filter((p: Person) => p !== personToEdit);
         }
       });
+      updateItems([...items]);
       if (!people.includes(personToEdit)) {
         updatePeople([...people, personToEdit]);
       }
@@ -93,10 +94,12 @@ export default function PeopleScreen() {
           style={{ flex: 7, flexDirection: 'column' }}
           onPress={() => openModal(person)}
         >
-          <ThemedText type='bold' style={styles.name}>{person.name}</ThemedText>
-          <ThemedText numberOfLines={1} style={{ marginTop: -15 }}>
-            {items.filter(i => i.payers.includes(person)).map(i => i.name).join(', ')}
-          </ThemedText>
+          <ThemedText style={styles.name}>{person.name}</ThemedText>
+          <View style={{ flexDirection: 'row' }}>
+            <ThemedText numberOfLines={1} style={{ fontSize: 12 }}>
+              {items.filter(i => i.payers.includes(person)).map(i => i.name).join(', ')}
+            </ThemedText>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -246,15 +249,15 @@ const styles = StyleSheet.create({
   },
   listItem: {
     flexDirection: 'row',
-    height: 70,
+    height: 65,
     paddingVertical: 5,
     borderBottomWidth: 1,
   },
   name: {
     fontSize: 18,
-    height: 55,
-    width: '70%',
-    textAlignVertical: 'center',
+    height: 50,
+    flex: 7,
+    // textAlignVertical: 'center',
   },
   delete: {
     flex: 1,
