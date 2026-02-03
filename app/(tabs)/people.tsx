@@ -1,6 +1,6 @@
 import { StyleSheet, View, FlatList, Dimensions, Alert, Animated } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useContext, useRef, useState } from 'react';
 
 import { Person, Item } from '@/assets/types';
 import pageInit from '@/assets/init';
@@ -8,9 +8,11 @@ import DropdownSelect from 'react-native-input-select';
 import { DropdownSelectHandle } from 'react-native-input-select/lib/typescript/src/types/index.types';
 import { ThemedText } from '@/components/ThemedText';
 import ModalWrapper from '@/components/ModalWrapper';
+import StateContext from '@/context/StateContext';
 
 export default function PeopleScreen() {
-  const {state, themeColors, updatePeople, updateItems} = pageInit();
+  const { themeColors } = pageInit();
+  const { items, people, updatePeople, updateItems } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -39,8 +41,8 @@ export default function PeopleScreen() {
   const openModal = (person: Person) => {
     setPersonToEdit(person);
     setName(person.name);
-    const idxs = state.items.filter((item: Item) => item.payers.includes(person));
-    setItemIdx(idxs.map((item: Item) => state.items.indexOf(item)));
+    const idxs = items.filter((item: Item) => item.payers.includes(person));
+    setItemIdx(idxs.map((item: Item) => items.indexOf(item)));
     setModalVisible(true);
     fadeIn();
   };
@@ -57,7 +59,7 @@ export default function PeopleScreen() {
   const updatePerson = () => {
     if (personToEdit) {
       personToEdit.name = name;
-      state.items.forEach((item: Item, idx: number) => {
+      items.forEach((item: Item, idx: number) => {
         if (itemIdx.includes(idx)) {
           if (!item.payers.includes(personToEdit)) {
             item.payers.push(personToEdit);
@@ -66,24 +68,22 @@ export default function PeopleScreen() {
           item.payers = item.payers.filter((p: Person) => p !== personToEdit);
         }
       });
-      if (!state.people.includes(personToEdit)) {
-        updatePeople([...state.people, personToEdit]);
-      } else {
-        updatePeople([...state.people])
+      if (!people.includes(personToEdit)) {
+        updatePeople([...people, personToEdit]);
       }
     }
     closeModal();
   };
 
   // Remove the person from the list of people and any items they are currently paying for
-  const removePerson = (person: Person) => {
-    updatePeople(state.people.filter((p) => p !== person));
-    const newItems = [...state.items];
+  const removePerson = useCallback((person: Person) => {
+    updatePeople(people.filter((p) => !Object.is(p, person)));
+    const newItems = [...items];
     newItems.forEach((item: Item) => {
-      item.payers = item.payers.filter((p: Person) => p !== person);
+      item.payers = item.payers.filter((p: Person) => !Object.is(p, person));
     });
     updateItems(newItems);
-  };
+  }, [people]);
 
   // FlatList component to render each person in the list
   const PersonDisplay = useCallback(({ person }: { person: Person }) => {
@@ -91,20 +91,23 @@ export default function PeopleScreen() {
       <View style={[styles.listItem, { borderColor: themeColors.primary }]}>
         <TouchableOpacity
           style={{ flex: 7, flexDirection: 'column' }}
-          onPress={() => {openModal(person)}}
+          onPress={() => openModal(person)}
         >
-          <ThemedText style={styles.name}>{person.name}</ThemedText>
+          <ThemedText type='bold' style={styles.name}>{person.name}</ThemedText>
+          <ThemedText numberOfLines={1} style={{ marginTop: -15 }}>
+            {items.filter(i => i.payers.includes(person)).map(i => i.name).join(', ')}
+          </ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.delete}
-          onPress={() => {removePerson(person)}}
+          onPress={() => removePerson(person)}
         >
-          <ThemedText style={{ color: 'red', paddingTop: 15, textAlign: 'center' }}>X</ThemedText>
+          <ThemedText type='bold' style={{ color: 'red', paddingTop: 15, textAlign: 'center' }}>X</ThemedText>
         </TouchableOpacity>
       </View>
     );
-  }, []);
+  }, [people, items]);
 
   return (
     <View style={[styles.main, {  backgroundColor: themeColors.background}]}>
@@ -135,16 +138,14 @@ export default function PeopleScreen() {
       </View>
 
       {/* Display message or list depending on list length */}
-      {state.people.length == 0 ? (
+      {people.length == 0 ? (
         <ThemedText style={{ marginTop: 25, fontSize: 20 }}>No friends yet :'(</ThemedText>
       ) : (
         <FlatList
-          data={state.people}
+          data={people}
           style={styles.list}
-          renderItem={({ item }) => (
-            <PersonDisplay person={item} />
-          )}
-          keyExtractor={(item) => state.people.indexOf(item).toString()}
+          renderItem={({ item }) => <PersonDisplay person={item} />}
+          keyExtractor={(item) => people.indexOf(item).toString()}
         />
       )}
 
@@ -156,7 +157,7 @@ export default function PeopleScreen() {
         closeModal={() => closeModal()}
       >
         {/* Edit person name */}
-        <ThemedText style={styles.modalLabel}>Friend's name</ThemedText>
+        <ThemedText type='bold' style={styles.modalLabel}>Friend's name</ThemedText>
         <TextInput
           style={[styles.modalInput, {color: themeColors.text}]}
           placeholder="Enter your friend's name"
@@ -167,13 +168,13 @@ export default function PeopleScreen() {
         />
 
         {/* Dropdown for all items */}
-        <ThemedText style={styles.modalLabel}>Select item(s)</ThemedText>
+        <ThemedText type='bold' style={styles.modalLabel}>Select item(s)</ThemedText>
         <DropdownSelect
           // label="Items"
           placeholder="Select item(s)"
           isMultiple={true}
           isSearchable={false}
-          options={state.items.map((item: Item, idx: number) => ({label: item.name, value: idx}))}
+          options={items.map((item: Item, idx: number) => ({label: item.name, value: idx}))}
           selectedValue={itemIdx}
           onValueChange={(i: any) => {
             setItemIdx(i);
@@ -186,6 +187,8 @@ export default function PeopleScreen() {
               onRequestClose: () => {dropdownRef.current?.close()},
             }
           }}
+          multipleSelectedItemStyle={{ fontSize: 14 }}
+          dropdownStyle={{ height: 75 }}
           ref={(ref) => {dropdownRef.current = ref}}
         />
 
@@ -237,19 +240,19 @@ const styles = StyleSheet.create({
   list: {
     marginVertical: 20,
     paddingHorizontal: 20,
-    width: '80%',
-    height: 500,
+    width: '85%',
+    flex: 1,
     borderRadius: 5,
   },
   listItem: {
     flexDirection: 'row',
-    height: 60,
+    height: 70,
     paddingVertical: 5,
     borderBottomWidth: 1,
   },
   name: {
     fontSize: 18,
-    height: 50,
+    height: 55,
     width: '70%',
     textAlignVertical: 'center',
   },
