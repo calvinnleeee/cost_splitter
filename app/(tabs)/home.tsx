@@ -3,11 +3,11 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { Item, Person } from '@/assets/types';
 import { ThemedText } from '@/components/ThemedText';
 import StateContext from '@/context/StateContext';
-import getTheme from '@/assets/theme';
+import { useTheme } from '@/context/ThemeContext';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
-  const { themeColors } = getTheme();
+  const { themeColors } = useTheme();
   const { items, people, updateItems, updatePeople } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
 

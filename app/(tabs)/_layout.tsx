@@ -7,14 +7,11 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 
 import { useTheme } from '@/context/ThemeContext';
-import { ColorTheme, Colors } from '@/assets/themes';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ColorTheme } from '@/assets/themes';
 
 export default function TabLayout() {
 
-  const colorScheme = useColorScheme();
-  const { theme, toggleTheme } = useTheme();
-  const themeColors = theme === ColorTheme.system ? Colors[colorScheme ?? 'light'] : Colors[theme];
+  const { theme, themeColors, toggleTheme } = useTheme();
 
   return (
     <Tabs

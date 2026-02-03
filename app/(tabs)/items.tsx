@@ -2,13 +2,13 @@ import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Dimensio
 import Checkbox from 'expo-checkbox';
 import { useCallback, useContext, useRef, useState } from 'react';
 import { Item } from '@/assets/types';
-import getTheme from '@/assets/theme';
 import StateContext from '@/context/StateContext';
 import { ThemedText } from '@/components/ThemedText';
 import ModalWrapper from '@/components/ModalWrapper';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function ItemsScreen() {
-  const { themeColors } = getTheme();
+  const { themeColors } = useTheme();
   const { items, updateItems } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
 
