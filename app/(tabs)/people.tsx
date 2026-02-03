@@ -3,7 +3,7 @@ import { TextInput, TouchableOpacity } from 'react-native';
 import { useCallback, useContext, useRef, useState } from 'react';
 
 import { Person, Item } from '@/assets/types';
-import pageInit from '@/assets/init';
+import getTheme from '@/assets/theme';
 import DropdownSelect from 'react-native-input-select';
 import { DropdownSelectHandle } from 'react-native-input-select/lib/typescript/src/types/index.types';
 import { ThemedText } from '@/components/ThemedText';
@@ -11,7 +11,7 @@ import ModalWrapper from '@/components/ModalWrapper';
 import StateContext from '@/context/StateContext';
 
 export default function PeopleScreen() {
-  const { themeColors } = pageInit();
+  const { themeColors } = getTheme();
   const { items, people, updatePeople, updateItems } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
 

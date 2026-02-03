@@ -1,4 +1,4 @@
-import pageInit from "@/assets/init";
+import getTheme from "@/assets/theme";
 import { Keyboard, Modal, StyleSheet, TouchableOpacity } from "react-native"
 
 export default function ModalWrapper({
@@ -10,7 +10,7 @@ export default function ModalWrapper({
   closeModal: () => void,
   children: React.ReactNode
 }) {
-  const { themeColors } = pageInit();
+  const { themeColors } = getTheme();
 
   return (
     <Modal

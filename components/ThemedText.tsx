@@ -1,5 +1,5 @@
 import { Text, type TextProps, StyleSheet } from 'react-native';
-import pageInit from '@/assets/init';
+import getTheme from '@/assets/theme';
 
 export type ThemedTextProps = TextProps & {
   type?: 'default' | 'title' | 'bold' | 'subtitle' | 'link';
@@ -10,7 +10,7 @@ export function ThemedText({
   type = 'default',
   ...rest
 }: ThemedTextProps) {
-  const { themeColors } = pageInit();
+  const { themeColors } = getTheme();
 
   return (
     <Text

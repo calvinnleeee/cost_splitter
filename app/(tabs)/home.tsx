@@ -1,13 +1,15 @@
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, Modal, Dimensions, TextInput, Alert, Share } from 'react-native';
-import pageInit from '@/assets/init';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Item, Person } from '@/assets/types';
 import { ThemedText } from '@/components/ThemedText';
+import StateContext from '@/context/StateContext';
+import getTheme from '@/assets/theme';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
+  const { themeColors } = getTheme();
+  const { items, people, updateItems, updatePeople } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
-  const {state, themeColors, updateItems, updatePeople} = pageInit();
 
   const [tipPct, setTipPct] = useState(0);
   const [tipAmt, setTipAmt] = useState(0);
@@ -17,8 +19,8 @@ export default function HomeScreen() {
 
   let total = 0;
 
-  let subtotal = state.items.reduce((acc, item) => acc + item.price, 0);
-  let tax = state.items.reduce((acc, item) => acc + item.getTax(), 0);
+  let subtotal = items.reduce((acc, item) => acc + item.price, 0);
+  let tax = items.reduce((acc, item) => acc + item.getTax(), 0);
   total = subtotal + tax + tipAmt;
 
   // Calculate the tip amount based on the subtotal and tax
@@ -41,10 +43,10 @@ export default function HomeScreen() {
       `Tip: $${tipAmt.toFixed(2)}\n` +
       `Total: $${total.toFixed(2)}\n` +
       `######################################\n`;
-    state.people.forEach((person: Person) => {
-      let owed = state.items.reduce((acc, item) => item.payers.includes(person) ? acc + (item.getPrice() / item.payers.length) * (1 + tipPct / 100): acc, 0);
+    people.forEach((person: Person) => {
+      let owed = items.reduce((acc, item) => item.payers.includes(person) ? acc + (item.getPrice() / item.payers.length) * (1 + tipPct / 100): acc, 0);
       msg += `${person.name}: $${owed.toFixed(2)}\n`;
-      msg += `-- ${state.items.filter((item: Item) => item.payers.includes(person)).map((item: Item) => item.name).join(", ")}\n\n`;
+      msg += `-- ${items.filter((item: Item) => item.payers.includes(person)).map((item: Item) => item.name).join(", ")}\n\n`;
     });
 
     console.log(msg);
@@ -61,32 +63,32 @@ export default function HomeScreen() {
     }
   }
 
-  const ListItem = useCallback((item: Person) => {
-    const person = item;
+  // Component displaying each person, what items they are paying for, and how much they owe
+  const ListItem = useCallback(({ person }: {person: Person}) => {
     let owed = 
-      state.items.reduce((acc, item) => item.payers.includes(person) ? acc + 
+      items.reduce((acc, item) => item.payers.includes(person) ? acc + 
         (item.getPrice() / item.payers.length) * (1 + tipPct / 100): acc, 0
       );
     return (
       <View style={[styles.listItem, { borderBottomColor: themeColors.primary }]}>
         <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-          <ThemedText type='bold' style={[styles.text, { flex: 3 }]}>{item.name}</ThemedText>
+          <ThemedText type='bold' style={[styles.text, { flex: 3 }]}>{person.name}</ThemedText>
           <ThemedText type='bold' style={[styles.text, { flex: 1 }]}>${owed.toFixed(2)}</ThemedText>
         </View>
         <View style={{ marginBottom: 5 }}>
           <ThemedText style={styles.subtext}>
-            {state.items.filter((item: Item) => item.payers.includes(person)).map((item: Item) => item.name).join(', ')}
+            {items.filter((item: Item) => item.payers.includes(person)).map((item: Item) => item.name).join(', ')}
           </ThemedText>
         </View>
       </View>
     )
-  }, [state]);
+  }, [items, people, tipPct]);
 
 
   return (
     <View style={[styles.main, { backgroundColor: themeColors.background }]}>
       {/* Display messages if items and people aren't filled out yet, otherwise show the totals */}
-      {state.items.length === 0 ? (
+      {items.length === 0 ? (
         <ThemedText style={[styles.text, { marginVertical: 40 }]}>
           You need to add some items to the bill!
         </ThemedText>
@@ -161,13 +163,13 @@ export default function HomeScreen() {
             </View>
           </View>
           <FlatList
-            data={state.people}
+            data={people}
             style={styles.list}
-            renderItem={({ item }) => ListItem(item)}
+            renderItem={({ item }) => <ListItem person={item} />}
             ListEmptyComponent={() =>
               <Text style={[styles.text, {color: themeColors.text, alignSelf: 'center'}]}>You need some friends! :(</Text>
             }
-            keyExtractor={(item) => state.people.indexOf(item).toString()}
+            keyExtractor={(item) => people.indexOf(item).toString()}
           />
 
         </>
