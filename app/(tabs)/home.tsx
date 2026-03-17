@@ -1,7 +1,7 @@
 import { Item, Person } from '@/assets/types';
 import { ThemedText } from '@/components/themed-text';
-import StateContext from '@/context/StateContext';
-import { useTheme } from '@/context/ThemeContext';
+import StateContext from '@/context/state-context';
+import { useTheme } from '@/context/theme-context';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Dimensions, FlatList, Modal, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 // import AsyncStorage from '@react-native-async-storage/async-storage';

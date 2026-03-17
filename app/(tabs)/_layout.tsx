@@ -7,7 +7,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import TabBarBackground from '@/components/ui/tab-bar-background';
 
 import { ColorTheme } from '@/assets/themes';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/context/theme-context';
 
 export default function TabLayout() {
 

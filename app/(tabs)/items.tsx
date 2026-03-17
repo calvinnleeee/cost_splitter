@@ -1,8 +1,8 @@
 import { Item } from '@/assets/types';
-import ModalWrapper from '@/components/ModalWrapper';
+import ModalWrapper from '@/components/modal-wrapper';
 import { ThemedText } from '@/components/themed-text';
-import StateContext from '@/context/StateContext';
-import { useTheme } from '@/context/ThemeContext';
+import StateContext from '@/context/state-context';
+import { useTheme } from '@/context/theme-context';
 import Checkbox from 'expo-checkbox';
 import { useCallback, useContext, useRef, useState } from 'react';
 import { Alert, Animated, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';

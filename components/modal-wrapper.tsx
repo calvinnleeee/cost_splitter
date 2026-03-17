@@ -1,5 +1,5 @@
-import { useTheme } from "@/context/ThemeContext";
-import { Keyboard, Modal, StyleSheet, TouchableOpacity } from "react-native"
+import { useTheme } from '@/context/theme-context';
+import { Keyboard, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function ModalWrapper({
   isVisible,

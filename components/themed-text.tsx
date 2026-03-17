@@ -1,5 +1,5 @@
-import { Text, type TextProps, StyleSheet } from 'react-native';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/context/theme-context';
+import { StyleSheet, Text, type TextProps } from 'react-native';
 
 export type ThemedTextProps = TextProps & {
   type?: 'default' | 'title' | 'bold' | 'subtitle' | 'link';
