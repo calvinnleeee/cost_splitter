@@ -117,7 +117,7 @@ export default function PeopleScreen() {
       {/* Title */}
       <ThemedText type='title' style={styles.title}>Add/Remove Friends</ThemedText>
 
-      <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-evenly' }}>
+      <View style={{ flexDirection: 'row', width: '90%', justifyContent: 'space-evenly' }}>
       {/* Add friend button */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: themeColors.primary }]}
@@ -235,9 +235,11 @@ const styles = StyleSheet.create({
   },
   button: {
     borderRadius: 10,
-    width: 110,
+    width: '35%',
+    paddingVertical: 15,
     padding: 10,
     justifyContent: 'center',
+
   },
   list: {
     marginVertical: 20,
@@ -273,17 +275,20 @@ const styles = StyleSheet.create({
     zIndex: 3,
   },
   modalButtons: {
+    position: 'absolute',
+    bottom: '30%',
     alignSelf: 'center',
-    width: '80%',
+    width: '90%',
     flexDirection: 'row',
     justifyContent: 'space-evenly'
   },
   modalLabel: {
+    marginLeft: '5%',
     fontSize: 18,
     marginBottom: 5,
   },
   modalInput: {
-    width: '90%',
+    width: '85%',
     height: 40,
     alignSelf: 'center',
     fontSize: 16,

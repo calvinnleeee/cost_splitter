@@ -268,7 +268,8 @@ const styles = StyleSheet.create({
   },
   button1: {
     borderRadius: 10,
-    width: '28%',
+    width: '26%',
+    paddingVertical: 15,
     padding: 10,
     justifyContent: 'center',
   },
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
   },
   topContainer: {
     marginVertical: '3%',
-    width: '85%',
+    width: '90%',
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignSelf: 'center',

@@ -113,7 +113,7 @@ export default function ItemsScreen() {
       {/* Title */}
       <ThemedText type='title' style={styles.title}>Manage items</ThemedText>
 
-      <View style={{ flexDirection: 'row', width: '80%', justifyContent: 'space-evenly' }}>
+      <View style={{ flexDirection: 'row', width: '90%', justifyContent: 'space-evenly' }}>
         {/* Add item button */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: themeColors.primary }]}
@@ -246,8 +246,8 @@ export default function ItemsScreen() {
           >
             <ThemedText style={{ textAlign: 'center' }}>Cancel</ThemedText>
           </TouchableOpacity>
-
         </View>
+
       </ModalWrapper>
 
     </View>
@@ -268,7 +268,8 @@ const styles = StyleSheet.create({
   },
   button: {
     borderRadius: 10,
-    width: 110,
+    width: '35%',
+    paddingVertical: 15,
     padding: 10,
     justifyContent: 'center',
   },
@@ -320,11 +321,12 @@ const styles = StyleSheet.create({
     zIndex: 3,
   },
   modalLabel: {
+    marginLeft: '5%',
     fontSize: 20,
     marginVertical: 5,
   },
   modalInput: {
-    width: '90%',
+    width: '85%',
     height: 40,
     alignSelf: 'center',
     fontSize: 16,
@@ -350,8 +352,10 @@ const styles = StyleSheet.create({
     height: 25,
   },
   modalButtons: {
+    position: 'absolute',
+    bottom: '25%',
     alignSelf: 'center',
-    width: '80%',
+    width: '90%',
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     gap: 20,
