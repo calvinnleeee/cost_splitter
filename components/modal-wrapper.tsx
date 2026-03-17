@@ -24,12 +24,12 @@ export default function ModalWrapper({
         onPressOut={() => closeModal()}
       >
         <TouchableOpacity
-        style={[styles.modal, { borderColor: themeColors.text, backgroundColor: themeColors.background}]}
-        activeOpacity={1}
-        onPress={() => Keyboard.dismiss()}
-      >
-        {children}
-      </TouchableOpacity>
+          style={[styles.modal, { borderColor: themeColors.text, backgroundColor: themeColors.background}]}
+          activeOpacity={1}
+          onPress={() => Keyboard.dismiss()}
+        >
+          {children}
+        </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
   )
@@ -40,13 +40,14 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'flex-start',
+    flexWrap: 'nowrap',
     // alignItems: 'center',
   },
   modal: {
-    width: '90%',
-    // height: '70%',
+    width: '100%',
+    height: '85%',
     alignSelf: 'center',
-    marginTop: '10%',
+    marginTop: '50%',
     padding: 15,
     paddingVertical: 25,
     borderRadius: 10,
