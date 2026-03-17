@@ -1,14 +1,13 @@
-import { StyleSheet, View, FlatList, Dimensions, Alert, Animated } from 'react-native';
-import { TextInput, TouchableOpacity } from 'react-native';
 import { useCallback, useContext, useRef, useState } from 'react';
+import { Alert, Animated, Dimensions, FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { Person, Item } from '@/assets/types';
+import { Item, Person } from '@/assets/types';
+import ModalWrapper from '@/components/ModalWrapper';
+import { ThemedText } from '@/components/themed-text';
+import StateContext from '@/context/StateContext';
 import { useTheme } from '@/context/ThemeContext';
 import DropdownSelect from 'react-native-input-select';
 import { DropdownSelectHandle } from 'react-native-input-select/lib/typescript/src/types/index.types';
-import { ThemedText } from '@/components/ThemedText';
-import ModalWrapper from '@/components/ModalWrapper';
-import StateContext from '@/context/StateContext';
 
 export default function PeopleScreen() {
   const { themeColors } = useTheme();

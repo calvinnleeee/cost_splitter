@@ -1,13 +1,13 @@
 import { Tabs } from 'expo-router';
-import React, { useContext } from 'react';
-import { Platform, Touchable, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { Platform, TouchableOpacity } from 'react-native';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
+import { HapticTab } from '@/components/haptic-tab';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import TabBarBackground from '@/components/ui/tab-bar-background';
 
-import { useTheme } from '@/context/ThemeContext';
 import { ColorTheme } from '@/assets/themes';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function TabLayout() {
 

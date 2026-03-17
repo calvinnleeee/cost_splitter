@@ -1,9 +1,9 @@
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, Modal, Dimensions, TextInput, Alert, Share } from 'react-native';
-import { useCallback, useContext, useEffect, useState } from 'react';
 import { Item, Person } from '@/assets/types';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedText } from '@/components/themed-text';
 import StateContext from '@/context/StateContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { Alert, Dimensions, FlatList, Modal, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {

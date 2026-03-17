@@ -1,11 +1,11 @@
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Dimensions, Alert, Animated } from 'react-native';
+import { Item } from '@/assets/types';
+import ModalWrapper from '@/components/ModalWrapper';
+import { ThemedText } from '@/components/themed-text';
+import StateContext from '@/context/StateContext';
+import { useTheme } from '@/context/ThemeContext';
 import Checkbox from 'expo-checkbox';
 import { useCallback, useContext, useRef, useState } from 'react';
-import { Item } from '@/assets/types';
-import StateContext from '@/context/StateContext';
-import { ThemedText } from '@/components/ThemedText';
-import ModalWrapper from '@/components/ModalWrapper';
-import { useTheme } from '@/context/ThemeContext';
+import { Alert, Animated, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function ItemsScreen() {
   const { themeColors } = useTheme();
