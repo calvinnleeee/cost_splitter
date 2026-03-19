@@ -1,34 +1,42 @@
-import React, { createContext, useState, PropsWithChildren, useEffect } from 'react';
-import { Person, Item, State } from '@/assets/types';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Item, Person } from '@/assets/types';
+import React, { createContext, PropsWithChildren, useEffect, useState } from 'react';
 
 interface StateContextType {
-  state: State;
   items: Item[];
   people: Person[];
   updatePeople: (peopleList: Person[]) => void;
   updateItems: (itemsList: Item[]) => void;
+  subtotal: number;
+  total: number;
+  tax: number;
 }
 
 const StateContext = createContext<StateContextType>({
-  state: {people: [], items: []},
   items: [],
   people: [],
-  updatePeople: (peopleList: Person[]) => {},
-  updateItems: (itemsList: Item[]) => {},
+  updatePeople: () => {},
+  updateItems: () => {},
+  subtotal: 0,
+  total: 0,
+  tax: 0,
 });
 
 export const StateProvider = ({children}: PropsWithChildren) => {
   const [peopleList, setPeopleList] = useState<Person[]>([]);
   const [itemsList, setItemsList] = useState<Item[]>([]);
-  const [state, setState] = useState<State>({people: peopleList, items: itemsList});
 
+  const [subtotal, setSubtotal] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0);
+  const [tax, setTax] = useState<number>(0);
+
+  // Update subtotal, total, and tax when items change
   useEffect(() => {
-    setState({
-      people: peopleList,
-      items: itemsList,
-    });
-  }, [peopleList, itemsList]);
+    const newSubtotal = itemsList.reduce((sum, item) => sum + item.price, 0);
+    setSubtotal(newSubtotal);
+    const newTax = itemsList.reduce((sum, item) => sum + item.getTax(), 0)
+    setTax(newTax);
+    setTotal(newSubtotal + newTax);
+  }, [itemsList]);
 
   const updatePeople = (peopleList: Person[]) => {
     setPeopleList(peopleList);
@@ -39,7 +47,15 @@ export const StateProvider = ({children}: PropsWithChildren) => {
   };
 
   return (
-    <StateContext.Provider value={{ state, items: itemsList, people: peopleList, updatePeople, updateItems }}>
+    <StateContext.Provider value={{
+      items: itemsList,
+      people: peopleList,
+      updatePeople, 
+      updateItems, 
+      subtotal, 
+      total, 
+      tax
+    }}>
       {children}
     </StateContext.Provider>
   );
