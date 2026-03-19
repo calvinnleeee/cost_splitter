@@ -190,7 +190,7 @@ export default function HomeScreen() {
             style={[styles.modal, { borderColor: themeColors.text, backgroundColor: themeColors.background}]}
             activeOpacity={1}
           >
-            {/* Edit item name */}
+            {/* Tip percentage */}
             <ThemedText style={styles.modalLabel}>Tip Percentage</ThemedText>
             <TextInput
               style={[styles.modalInput, {color: themeColors.text}]}
@@ -205,7 +205,7 @@ export default function HomeScreen() {
               inputMode='numeric'
             />
 
-            {/* Edit item's price */}
+            {/* Tip amount */}
             <ThemedText style={styles.modalLabel}>Tip Amount ($)</ThemedText>
             <TextInput
               style={[styles.modalInput, {color: themeColors.text}]}
@@ -220,7 +220,7 @@ export default function HomeScreen() {
               inputMode='numeric'
             />
 
-            {/* Accept and cancel/exit buttons */}
+            {/* Confirm and cancel buttons */}
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.button2, { backgroundColor: themeColors.primary }]}
