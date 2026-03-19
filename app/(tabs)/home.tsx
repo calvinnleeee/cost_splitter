@@ -8,7 +8,7 @@ import { Alert, Dimensions, FlatList, Modal, Share, StyleSheet, Text, TextInput,
 
 export default function HomeScreen() {
   const { themeColors } = useTheme();
-  const { items, people, updateItems, updatePeople } = useContext(StateContext);
+  const { items, people, updateItems, updatePeople, subtotal, total, tax } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
 
   const [tipPct, setTipPct] = useState(0);
@@ -17,16 +17,10 @@ export default function HomeScreen() {
   const [modalPct, setModalPct] = useState('');
   const [modalAmt, setModalAmt] = useState('');
 
-  let total = 0;
-
-  let subtotal = items.reduce((acc, item) => acc + item.price, 0);
-  let tax = items.reduce((acc, item) => acc + item.getTax(), 0);
-  total = subtotal + tax + tipAmt;
-
   // Calculate the tip amount based on the subtotal and tax
   useEffect(() => {
     setTipAmt((subtotal + tax) * (tipPct / 100));
-  }, []);
+  }, [subtotal, tax, tipPct]);
 
   // Function to reset everything
   const resetAll = () => {
@@ -49,8 +43,6 @@ export default function HomeScreen() {
       msg += `-- ${items.filter((item: Item) => item.payers.includes(person)).map((item: Item) => item.name).join(", ")}\n\n`;
     });
 
-    console.log(msg);
-
     try {
       const result = await Share.share({
         message: msg,
@@ -65,7 +57,7 @@ export default function HomeScreen() {
 
   // Component displaying each person, what items they are paying for, and how much they owe
   const ListItem = useCallback(({ person }: {person: Person}) => {
-    let owed = 
+    const owed = 
       items.reduce((acc, item) => item.payers.includes(person) ? acc + 
         (item.getPrice() / item.payers.length) * (1 + tipPct / 100): acc, 0
       );
