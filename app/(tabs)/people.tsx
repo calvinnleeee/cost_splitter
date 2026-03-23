@@ -1,5 +1,5 @@
 import { useCallback, useContext, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, FlatList, Pressable, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { Item, Person } from '@/assets/types';
 import ModalWrapper from '@/components/modal-wrapper';
@@ -14,12 +14,15 @@ export default function PeopleScreen() {
   const { items, people, updatePeople, updateItems } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
 
-  const [modalVisible, setModalVisible] = useState(false);
+  const [addVisible, setAddVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
+  const [friendsToAdd, setFriendsToAdd] = useState<string[]>([]);
   const [personToEdit, setPersonToEdit] = useState<Person | null>(null);
   const [name, setName] = useState<string>('');
   const [itemIdx, setItemIdx] = useState<number[]>([]);
   const dropdownRef = useRef<DropdownSelectHandle | null>(null);
 
+  // Animated value and functions for fading in/out the background when the modal is opened or closed
   const modalOpacity = useRef(new Animated.Value(0));
   const fadeIn = () => {
     Animated.timing(modalOpacity.current, {
@@ -36,23 +39,35 @@ export default function PeopleScreen() {
     }).start();
   };
 
-  // Open the modal after setting the person to edit
-  const openModal = (person: Person) => {
+  // Open/close modal for editing a person
+  const openEdit = (person: Person) => {
     setPersonToEdit(person);
     setName(person.name);
     const idxs = items.filter((item: Item) => item.payers.includes(person));
     setItemIdx(idxs.map((item: Item) => items.indexOf(item)));
-    setModalVisible(true);
+    // setModalVisible(true);
+    setEditVisible(true);
     fadeIn();
   };
 
-  // Close the modal and reset display values
-  const closeModal = () => {
+  const closeEdit = () => {
     setName('');
     setItemIdx([]);
-    setModalVisible(false);
+    setEditVisible(false);
     fadeOut();
   };
+
+  // Open/close modal for adding people
+  const openAdd = () => {
+    setAddVisible(true);
+    setFriendsToAdd([...people.map((p: Person) => p.name)]);
+    fadeIn();
+  };
+
+  const closeAdd = () => {
+    setAddVisible(false);
+    fadeOut();
+  }
 
   // Update the person currently being edited and add them to the list of people if they aren't in there yet
   const updatePerson = () => {
@@ -72,7 +87,7 @@ export default function PeopleScreen() {
         updatePeople([...people, personToEdit]);
       }
     }
-    closeModal();
+    closeEdit();
   };
 
   // Remove the person from the list of people and any items they are currently paying for
@@ -91,7 +106,7 @@ export default function PeopleScreen() {
       <View style={[styles.listItem, { borderColor: themeColors.primary }]}>
         <TouchableOpacity
           style={{ flex: 7, flexDirection: 'column' }}
-          onPress={() => openModal(person)}
+          onPress={() => openEdit(person)}
         >
           <ThemedText style={styles.name}>{person.name}</ThemedText>
           <View style={{ flexDirection: 'row' }}>
@@ -118,16 +133,12 @@ export default function PeopleScreen() {
       <ThemedText type='title' style={styles.title}>Add/Remove Friends</ThemedText>
 
       <View style={{ flexDirection: 'row', width: '90%', justifyContent: 'space-evenly' }}>
-      {/* Add friend button */}
+      {/* Add friends button */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: themeColors.primary }]}
-          onPress={() => {
-            const friend = new Person('Friend');
-            setPersonToEdit(friend);
-            openModal(friend);
-          }}
+          onPress={() => openAdd()}
         >
-          <ThemedText style={{ alignSelf: 'center' }}>Add friend</ThemedText>
+          <ThemedText style={{ alignSelf: 'center' }}>Add friends</ThemedText>
         </TouchableOpacity>
 
         {/* Reset button */}
@@ -153,10 +164,106 @@ export default function PeopleScreen() {
 
       <Animated.View style={[styles.modalBackground, { height: windowHeight * 1.5, opacity: modalOpacity.current }]} pointerEvents={'none'} />
 
-      {/* Modal for adding a friend */}
+      {/* Modal for adding friends */}
       <ModalWrapper
-        isVisible={modalVisible}
-        closeModal={() => closeModal()}
+        isVisible={addVisible}
+        closeModal={() => closeAdd()}
+      >
+        {/* Number to add */}
+        <ThemedText type='bold' style={styles.modalLabel}>Number of friends</ThemedText>
+        <View style={{ flexDirection: 'row', width: '85%', alignSelf: 'center', justifyContent: 'space-evenly', marginVertical: 10 }}>
+          <TouchableOpacity
+            style={{ padding: 15, backgroundColor: themeColors.primary, borderRadius: 5}}
+            onPress={() => setFriendsToAdd(friendsToAdd.slice(0, -1))}
+          >
+            <ThemedText type='bold' style={{ fontSize: 22, textAlign: 'center' }}>{'<'}</ThemedText>
+          </TouchableOpacity>
+          <TextInput
+            style={{ width: 40, fontSize: 20, alignSelf: 'center', textAlign: 'center', color: themeColors.text }}
+            keyboardType='decimal-pad'
+            selectTextOnFocus
+            value={friendsToAdd.length.toString()}
+            onChangeText={(value) => {
+              if (value.trim().length == 0) {
+                setFriendsToAdd([]);
+                return;
+              }
+              const numFriends = parseInt(value);
+              if (!isNaN(numFriends) && numFriends >= 0) {
+                setFriendsToAdd(Array(numFriends).fill('Friend'));
+              } else {
+                setFriendsToAdd([]);
+              }
+            }}
+          />
+          <TouchableOpacity
+            style={{ padding: 15, backgroundColor: themeColors.primary, borderRadius: 5}}
+            onPress={() => setFriendsToAdd([...friendsToAdd, 'Friend'])}
+          >
+            <ThemedText type='bold' style={{ fontSize: 22, textAlign: 'center' }}>{'>'}</ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ maxHeight: '45%', marginTop: 5, borderWidth: 1, borderColor: themeColors.primary, borderRadius: 3, paddingVertical: 5, flex: 1 }}>
+          <FlatList
+            data={friendsToAdd}
+            style={{ width: '85%', alignSelf: 'center' }}
+            contentContainerStyle={{ gap: 10, alignContent: 'flex-start', width: '100%' }}
+            renderItem={({ item, index }) =>
+              <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
+                <TextInput key={`friend_${index}`}
+                  style={{ borderBottomWidth: 1, borderRadius: 1, padding: 10, fontSize: 16, flex: 1 }}
+                  selectTextOnFocus
+                  value={item}
+                  onChangeText={(value) => {
+                    const newFriends = [...friendsToAdd];
+                    newFriends[index] = value;
+                    setFriendsToAdd(newFriends);
+                  }}
+                />
+                <Pressable onPress={() => {
+                  const newFriends = [...friendsToAdd];
+                  newFriends.splice(index, 1);
+                  setFriendsToAdd(newFriends);
+                }}>
+                  <ThemedText type='bold' style={{ fontSize: 16, color: 'red', padding: 10 }}>
+                    X
+                  </ThemedText>
+                </Pressable>
+              </View>
+            }
+          />
+        </View>
+
+        {/* Accept and cancel/exit buttons */}
+        <View style={styles.modalButtons}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: themeColors.primary }]}
+            onPress={() => {
+              // Add all friends to the list of people and close modal
+              const newPeople = friendsToAdd.map((name: string) => new Person(name));
+              updatePeople(newPeople);
+              setFriendsToAdd([]);
+              closeAdd();
+
+            }}
+          >
+            <ThemedText style={{ alignSelf: 'center' }}>Confirm</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: themeColors.primary }]}
+            onPress={() => closeAdd()}
+          >
+            <ThemedText style={{ alignSelf: 'center' }}>Cancel</ThemedText>
+          </TouchableOpacity>
+
+        </View>
+      </ModalWrapper>
+
+      {/* Modal for editing a friend */}
+      <ModalWrapper
+        isVisible={editVisible}
+        closeModal={() => closeEdit()}
       >
         {/* Edit person name */}
         <ThemedText type='bold' style={styles.modalLabel}>Friend's name</ThemedText>
@@ -211,7 +318,7 @@ export default function PeopleScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.button, { backgroundColor: themeColors.primary }]}
-            onPress={() => closeModal()}
+            onPress={() => closeEdit()}
           >
             <ThemedText style={{ alignSelf: 'center' }}>Cancel</ThemedText>
           </TouchableOpacity>
@@ -277,7 +384,7 @@ const styles = StyleSheet.create({
   },
   modalButtons: {
     position: 'absolute',
-    bottom: '30%',
+    bottom: '25%',
     alignSelf: 'center',
     width: '90%',
     flexDirection: 'row',
