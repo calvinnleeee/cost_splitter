@@ -190,6 +190,7 @@ export default function PeopleScreen() {
             }
           }}
           multipleSelectedItemStyle={{ fontSize: 14 }}
+          dropdownIconStyle={{ top: '50%', right: '5%' }}
           dropdownStyle={{ height: 75 }}
           ref={(ref) => {dropdownRef.current = ref}}
         />
