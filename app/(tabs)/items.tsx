@@ -4,14 +4,22 @@ import { ThemedText } from '@/components/themed-text';
 import StateContext from '@/context/state-context';
 import { useTheme } from '@/context/theme-context';
 import Checkbox from 'expo-checkbox';
-import { useCallback, useContext, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Dimensions, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 
 export default function ItemsScreen() {
   const { themeColors } = useTheme();
   const { items, updateItems } = useContext(StateContext);
   const windowHeight = Dimensions.get('window').height;
 
+  // Camera variables
+  const { hasPermission, requestPermission } = useCameraPermission();
+  const device = useCameraDevice('back');
+  const camera = useRef<Camera>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+
+  // Item page state items
   const [modalVisible, setModalVisible] = useState(false);
   const [itemToEdit, setItemToEdit] = useState<Item | null>(null);
   const [newName, setNewName] = useState<string>('');
@@ -20,6 +28,7 @@ export default function ItemsScreen() {
   const [modalPST7, setModalPST7] = useState<boolean>(false);
   const [modalPST10, setModalPST10] = useState<boolean>(false);
 
+  // Animate the background when modal appears and disappears
   const modalOpacity = useRef(new Animated.Value(0));
   const fadeIn = () => {
     Animated.timing(modalOpacity.current, {
@@ -59,6 +68,13 @@ export default function ItemsScreen() {
     fadeOut();
   };
 
+  // Request camera permission if permission not given yet and camera is opened.
+  useEffect(() => {
+    if (cameraOpen && !hasPermission) {
+      requestPermission();
+    }
+  }, [cameraOpen]);
+
   // Add the item to the list or update the existing item
   const updateItem = () => {
     if (itemToEdit) {
@@ -79,6 +95,35 @@ export default function ItemsScreen() {
     const arr = items.filter(i => !Object.is(i, item));
     updateItems(arr);
   }, [items]);
+
+  // Handler to open camera
+  const handleOpenCamera = async () => {
+    if (!hasPermission) {
+      const granted = await requestPermission();
+      if (!granted) {
+        Alert.alert('Permission denied', 'Camera access is required.');
+        return;
+      }
+    }
+    setCameraOpen(true);
+  };
+
+  // Handler to capture photo
+  const handleTakePhoto = async () => {
+    if (!camera.current) return;
+    try {
+      const photo = await camera.current.takePhoto({
+        flash: 'off',
+      });
+      console.log('Photo saved to:', photo.path);
+
+      // TODO: Add code to send to API for processing
+
+      setCameraOpen(false); // close camera after capture
+    } catch (err) {
+      console.error('Failed to take photo:', err);
+    }
+  };
 
   // Display component for each item in the list
   const ItemDisplay = ({ item }: { item: Item }) => (
@@ -122,15 +167,32 @@ export default function ItemsScreen() {
             openModal(newItem);
           }}
         >
-          <ThemedText style={{ textAlign: 'center' }}>Add item</ThemedText>
+          <ThemedText style={styles.buttonText}>Add item</ThemedText>
         </TouchableOpacity>
+
+        {/* Camera button */}
+        {device && 
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: themeColors.primary }]}
+          onPress={() => {
+            const cameraPermission = Camera.getCameraPermissionStatus();
+            // TODO: implement function for taking picture
+            handleOpenCamera();
+
+            console.log('button clicked');
+            console.log('camera permission: ', cameraPermission);
+            console.log('has permission: ', hasPermission);
+          }}
+        >
+          <ThemedText style={styles.buttonText}>Take pic</ThemedText>
+        </TouchableOpacity>}
 
         {/* Reset button */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: themeColors.primary }]}
           onPress={() => {updateItems([])}}
         >
-          <ThemedText style={{ textAlign: 'center' }}>Reset items</ThemedText>
+          <ThemedText style={styles.buttonText}>Reset items</ThemedText>
         </TouchableOpacity>
       </View>
 
@@ -250,6 +312,41 @@ export default function ItemsScreen() {
 
       </ModalWrapper>
 
+      <Modal
+        visible={cameraOpen}
+        animationType='slide'
+        statusBarTranslucent
+        onRequestClose={() => setCameraOpen(false)}
+      >
+        {device ? (
+          <>
+            <Camera
+              ref={camera}
+              style={StyleSheet.absoluteFill}
+              device={device}
+              isActive={cameraOpen}
+              photo={true}
+            />
+            <View style={styles.cameraControls}>
+              <TouchableOpacity
+                style={styles.captureButton}
+                onPress={handleTakePhoto}
+              />
+              <TouchableOpacity
+                style={{ padding: 10 }}
+                onPress={() => setCameraOpen(false)}
+              >
+                <ThemedText style={styles.cameraCancelText}>Cancel</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ThemedText style={{ color: themeColors.text }}>No camera device found.</ThemedText>
+          </View>
+        )}
+      </Modal>
+
     </View>
   );
 }
@@ -268,10 +365,14 @@ const styles = StyleSheet.create({
   },
   button: {
     borderRadius: 10,
-    width: '35%',
-    paddingVertical: 15,
+    width: '20%',
+    paddingVertical: 10,
     padding: 10,
     justifyContent: 'center',
+  },
+  buttonText: {
+    textAlign: 'center',
+    lineHeight: 18,
   },
   subtotal: {
     fontSize: 16,
@@ -360,4 +461,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     gap: 20,
   },
+  cameraControls: {
+    position: 'absolute',
+    bottom: '8%',
+    width: '100%',
+    alignItems: 'center',
+  },
+  captureButton: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#FFF',
+    borderWidth: 4,
+    borderColor: '#CCC',
+    marginBottom: 10,
+  },
+  cameraCancelText: {
+    fontSize: 16,
+    borderRadius: 20,
+    backgroundColor: '#FFF',
+    padding: 10,
+    borderColor: '#CCC',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  }
 });
